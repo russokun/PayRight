@@ -1,0 +1,130 @@
+openapi: 3.1.0
+info:
+  title: PayRight API (spec)
+  version: 0.1.0
+servers:
+  - url: https://api.payright.local
+paths:
+  /search:
+    get:
+      summary: Search products and list prices
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: lat
+          in: query
+          schema:
+            type: number
+        - name: lng
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProductWithPrices'
+  /reports:
+    post:
+      summary: Submit a price report
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PriceReportInput'
+      responses:
+        '201':
+          description: Created
+  /reports/{reportId}/confirm:
+    post:
+      summary: Confirm a price report
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Confirmed
+  /auth/register:
+    post:
+      summary: Register a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '201':
+          description: User created
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        product_id:
+          type: string
+        name:
+          type: string
+        brand:
+          type: string
+        category:
+          type: string
+    PriceEntry:
+      type: object
+      properties:
+        supermarket:
+          type: string
+        price:
+          type: number
+        currency:
+          type: string
+        recorded_at:
+          type: string
+          format: date-time
+    ProductWithPrices:
+      type: object
+      properties:
+        product:
+          $ref: '#/components/schemas/Product'
+        prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/PriceEntry'
+    PriceReportInput:
+      type: object
+      properties:
+        product_id:
+          type: string
+        supermarket_id:
+          type: string
+        price:
+          type: number
+        currency:
+          type: string
+        lat:
+          type: number
+        lng:
+          type: number
+        photo_url:
+          type: string

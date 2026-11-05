@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "awwwards": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "awwwards-mcp"
+      ],
+      "env": {}
+    },
+    "responsively": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@responsively/mcp"
+      ],
+      "env": {}
+    }
+  }
+}

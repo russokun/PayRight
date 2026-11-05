@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { House, MapPin, Plus, ShoppingCart, Trophy } from 'lucide-react-native';
 import type { ComponentType } from 'react';
+import type { ColorValue } from 'react-native';
 
 // Colores provisionales de marca (PRODUCT.md / globals.css de payright-web).
 // El Bloque 2 los reemplaza por tokens (theme/tokens.ts).
@@ -12,7 +13,10 @@ const LINE = '#E4E6DF';
 type IconProps = { size?: number; color?: string };
 
 function icon(Icon: ComponentType<IconProps>) {
-  return ({ size, color }: { size: number; color: string }) => <Icon size={size} color={color} />;
+  // Expo Router entrega `color` como ColorValue; con tabBarActive/InactiveTintColor en hex es siempre string.
+  return ({ size, color }: { size: number; color: ColorValue }) => (
+    <Icon size={size} color={color as string} />
+  );
 }
 
 // Mismas 5 secciones que BottomNav de payright-web.

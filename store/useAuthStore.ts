@@ -1,13 +1,13 @@
 import { create } from 'zustand';
 
+/**
+ * Estado de sesión. La app se usa SIN cuenta (igual que la web): no hay muro de login.
+ * El Bloque 6 lo conecta a la API (token Bearer en expo-secure-store).
+ */
 interface AuthStore {
   isAuthenticated: boolean;
-  login: () => void;
-  logout: () => void;
 }
 
-export const useAuthStore = create<AuthStore>((set) => ({
-  isAuthenticated: true, // preautenticado para facilitar testing
-  login: () => set({ isAuthenticated: true }),
-  logout: () => set({ isAuthenticated: false }),
+export const useAuthStore = create<AuthStore>(() => ({
+  isAuthenticated: false,
 }));

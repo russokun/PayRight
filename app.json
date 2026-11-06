@@ -28,7 +28,8 @@
         {
           "cameraPermission": "PayRight usa la cámara para escanear códigos de barras y fotografiar precios de góndola."
         }
-      ]
+      ],
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true

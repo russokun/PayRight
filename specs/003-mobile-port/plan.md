@@ -1,6 +1,6 @@
 # 003 — Portar payright-web a la app móvil nativa
 
-Estado: bloque 0 (0a saneamiento + 0b SDK 58) **terminado**. Siguiente: bloque 1.
+Estado: bloque 0 (0a saneamiento + 0b SDK 58) y bloque 1 (API `/api/v1` de lectura en payright-web) **terminados**. Siguiente: bloque 2 (tokens y componentes base) y bloque 3 (consumir la API).
 Plan elaborado con revisión de arquitectura (Opus) y verificado contra el código de ambos repos.
 Reemplaza a `specs/002-*`, cuyo contrato (Supabase + scraper Python) no coincide con la web real
 (archivado en `specs/_archivo/`).
@@ -39,7 +39,7 @@ Reemplaza a `specs/002-*`, cuyo contrato (Supabase + scraper Python) no coincide
 | # | Bloque | Terminado cuando | Skills |
 |---|---|---|---|
 | 0 | Saneamiento + SDK 58 | tsc limpio, bundles ios/android/web, sin datos inventados ✅ | expo-upgrade |
-| 1 | `/api/v1` lectura en payright-web (`search`, `products/:slug`, `barcode/:ean`, `meta`) + `specs/003-mobile-port/api-v1.md` | `curl` devuelve datos reales; test unitario del mapeo; `image_url` null con contenido de cadena apagado | — (leer `node_modules/next/dist/docs`, ver AGENTS.md de la web) |
+| 1 ✅ | `/api/v1` lectura en payright-web (`search`, `products/:slug`, `barcode/:ean`, `meta`); contrato en [`api-v1.md`](api-v1.md) | `curl` devuelve datos reales; test unitario del mapeo; `image_url` null con contenido de cadena apagado | — (leer `node_modules/next/dist/docs`, ver AGENTS.md de la web) |
 | 2 | Tokens y componentes base (claro/oscuro, fuentes, PriceBlock, SourceBadge, ProductCard, Button, LabelTile) | cero colores hardcodeados; sigue el tema del sistema | expo-web-to-native (leer una vez), expo-design-system, expo-native-ui |
 | 3 | Buscar, ficha y escáner con datos reales | buscar "leche" → ficha con cadenas, origen y fecha; escanear EAN abre la ficha | expo-data-fetching, expo-router, expo-ui |
 | 4 | Carrito y cotizar (local primero) | misma cotización que la web para la misma lista | expo-data-fetching |

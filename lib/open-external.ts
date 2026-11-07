@@ -1,4 +1,4 @@
-import * as WebBrowser from "expo-web-browser";
+import * as WebBrowser from 'expo-web-browser';
 
 /** Abre una página (la ficha de una cadena) en el navegador del sistema, con la barra de cierre de la app. */
 export async function openExternal(url: string): Promise<void> {

@@ -1,6 +1,18 @@
-import { keepPreviousData, useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import type { ProductDTO } from "@/types/api";
-import { getCategories, getListings, getMeta, getProduct, getTrend, searchProducts, type SearchFilters } from "./client";
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useQuery,
+} from '@tanstack/react-query';
+import type { ProductDTO } from '@/types/api';
+import {
+  getCategories,
+  getListings,
+  getMeta,
+  getProduct,
+  getTrend,
+  searchProducts,
+  type SearchFilters,
+} from './client';
 
 /** Cuánto se considera fresco cada dato antes de volver a pedirlo. */
 export const STALE = {
@@ -15,13 +27,13 @@ export const STALE = {
 export const SEARCH_PAGE_SIZE = 20;
 
 export const queryKeys = {
-  all: ["api"] as const,
-  meta: () => ["api", "meta"] as const,
-  search: (filters: SearchFilters) => ["api", "search", filters] as const,
-  product: (slug: string) => ["api", "product", slug] as const,
-  listings: (slug: string) => ["api", "product", slug, "listings"] as const,
-  trend: (slug: string) => ["api", "product", slug, "trend"] as const,
-  categories: (aisles: boolean) => ["api", "categories", aisles] as const,
+  all: ['api'] as const,
+  meta: () => ['api', 'meta'] as const,
+  search: (filters: SearchFilters) => ['api', 'search', filters] as const,
+  product: (slug: string) => ['api', 'product', slug] as const,
+  listings: (slug: string) => ['api', 'product', slug, 'listings'] as const,
+  trend: (slug: string) => ['api', 'product', slug, 'trend'] as const,
+  categories: (aisles: boolean) => ['api', 'categories', aisles] as const,
 };
 
 export function useMeta() {
@@ -41,7 +53,7 @@ export function normalizeFilters(filters: SearchFilters): SearchFilters {
   if (filters.subcategory) out.subcategory = filters.subcategory;
   if (filters.chain) out.chain = filters.chain;
   if (filters.offers) out.offers = true;
-  if (filters.sort && filters.sort !== "relevancia") out.sort = filters.sort;
+  if (filters.sort && filters.sort !== 'relevancia') out.sort = filters.sort;
   return out;
 }
 
@@ -53,9 +65,14 @@ export function useSearch(filters: SearchFilters, enabled = true) {
     enabled,
     initialPageParam: 0,
     queryFn: ({ pageParam, signal }) =>
-      searchProducts({ ...normalized, limit: SEARCH_PAGE_SIZE, offset: pageParam }, { signal }),
+      searchProducts(
+        { ...normalized, limit: SEARCH_PAGE_SIZE, offset: pageParam },
+        { signal },
+      ),
     getNextPageParam: (last) =>
-      last.page.has_more && last.items.length > 0 ? last.page.offset + last.items.length : undefined,
+      last.page.has_more && last.items.length > 0
+        ? last.page.offset + last.items.length
+        : undefined,
     staleTime: STALE.search,
     // al escribir, la lista anterior se queda hasta que llega la nueva: sin parpadeo
     placeholderData: keepPreviousData,

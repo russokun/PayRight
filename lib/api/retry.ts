@@ -1,8 +1,9 @@
-import { isApiClientError } from "./client";
+import { isApiClientError } from './client';
 
 /** Sin reintentos en 4xx (la petición está mal o no existe); 2 en red, tiempo agotado y 5xx. */
 export function shouldRetry(failureCount: number, error: unknown): boolean {
-  if (isApiClientError(error) && error.status >= 400 && error.status < 500) return false;
+  if (isApiClientError(error) && error.status >= 400 && error.status < 500)
+    return false;
   return failureCount < 2;
 }
 

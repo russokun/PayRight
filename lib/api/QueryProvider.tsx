@@ -1,7 +1,11 @@
-import { focusManager, QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useEffect, useState, type ReactNode } from "react";
-import { AppState, Platform } from "react-native";
-import { retryDelay, shouldRetry } from "./retry";
+import {
+  focusManager,
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query';
+import { useEffect, useState, type ReactNode } from 'react';
+import { AppState, Platform } from 'react-native';
+import { retryDelay, shouldRetry } from './retry';
 
 export function createQueryClient(): QueryClient {
   return new QueryClient({
@@ -25,8 +29,10 @@ export function QueryProvider({ children }: { children: ReactNode }) {
   const [client] = useState(createQueryClient);
 
   useEffect(() => {
-    if (Platform.OS === "web") return;
-    const sub = AppState.addEventListener("change", (state) => focusManager.setFocused(state === "active"));
+    if (Platform.OS === 'web') return;
+    const sub = AppState.addEventListener('change', (state) =>
+      focusManager.setFocused(state === 'active'),
+    );
     return () => sub.remove();
   }, []);
 

@@ -1,9 +1,10 @@
-import { BottomSheet, RNHostView } from "@expo/ui";
-import { ScrollView, Text, View } from "react-native";
-import { Button, Chip } from "@/components/ui";
-import type { SearchFilters } from "@/lib/api/client";
-import { SORT_OPTIONS, activeFilterCount } from "@/lib/search-url";
-import type { CategoryDTO, ChainDTO, DepartmentDTO } from "@/types/api";
+import { BottomSheet, RNHostView } from '@expo/ui';
+import { ScrollView, Text, View } from 'react-native';
+import { Button, Chip } from '@/components/ui';
+import type { SearchFilters } from '@/lib/api/client';
+import { SORT_OPTIONS, activeFilterCount } from '@/lib/search-url';
+import { useTheme } from '@/theme/useTheme';
+import type { CategoryDTO, ChainDTO, DepartmentDTO } from '@/types/api';
 
 type Props = {
   open: boolean;
@@ -13,14 +14,23 @@ type Props = {
   chains: ChainDTO[];
   categories: CategoryDTO[];
   /** Pasillos del departamento elegido (vacío si no hay o aún no cargan). */
-  aisles: NonNullable<DepartmentDTO["aisles"]>;
+  aisles: NonNullable<DepartmentDTO['aisles']>;
   onChange: (next: SearchFilters) => void;
 };
 
-function Group({ title, children }: { title: string; children: React.ReactNode }) {
+function Group({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <View className="gap-2">
-      <Text accessibilityRole="header" className="font-sans-bold text-sm text-ink">
+      <Text
+        accessibilityRole="header"
+        className="font-sans-bold text-sm text-ink"
+      >
         {title}
       </Text>
       <View className="flex-row flex-wrap gap-2">{children}</View>
@@ -32,14 +42,33 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
  * "Filtros y orden" como hoja nativa de `@expo/ui` (SwiftUI en iOS, Compose en Android, diálogo en web).
  * Cada toque aplica el filtro al instante, igual que en la web; "Ver N productos" solo cierra la hoja.
  */
-export function FilterSheet({ open, onClose, filters, total, chains, categories, aisles, onChange }: Props) {
+export function FilterSheet({
+  open,
+  onClose,
+  filters,
+  total,
+  chains,
+  categories,
+  aisles,
+  onChange,
+}: Props) {
+  const { colors } = useTheme();
   const active = activeFilterCount(filters) > 0 || !!filters.sort;
   return (
-    <BottomSheet isPresented={open} onDismiss={onClose} snapPoints={["half", "full"]}>
+    <BottomSheet
+      isPresented={open}
+      onDismiss={onClose}
+      snapPoints={[{ fraction: 0.75 }, 'full']}
+      containerColor={colors.bg}
+      contentPadding={{ top: 8, bottom: 0, left: 0, right: 0 }}
+    >
       <RNHostView>
-        <View className="flex-1 bg-bg">
+        <View className="flex-1">
           <View className="flex-row items-center justify-between px-4 pb-2">
-            <Text accessibilityRole="header" className="font-display-extrabold text-xl text-ink">
+            <Text
+              accessibilityRole="header"
+              className="font-display-extrabold text-xl text-ink"
+            >
               Filtros y orden
             </Text>
             {active ? (
@@ -51,14 +80,26 @@ export function FilterSheet({ open, onClose, filters, total, chains, categories,
               />
             ) : null}
           </View>
-          <ScrollView contentContainerStyle={{ gap: 20, paddingHorizontal: 16, paddingBottom: 16 }} keyboardShouldPersistTaps="handled">
+          <ScrollView
+            contentContainerStyle={{
+              gap: 20,
+              paddingHorizontal: 16,
+              paddingBottom: 16,
+            }}
+            keyboardShouldPersistTaps="handled"
+          >
             <Group title="Ordenar por">
               {SORT_OPTIONS.map((s) => (
                 <Chip
                   key={s.key}
                   label={s.label}
-                  selected={(filters.sort ?? "relevancia") === s.key}
-                  onPress={() => onChange({ ...filters, sort: s.key === "relevancia" ? undefined : s.key })}
+                  selected={(filters.sort ?? 'relevancia') === s.key}
+                  onPress={() =>
+                    onChange({
+                      ...filters,
+                      sort: s.key === 'relevancia' ? undefined : s.key,
+                    })
+                  }
                 />
               ))}
             </Group>
@@ -68,12 +109,26 @@ export function FilterSheet({ open, onClose, filters, total, chains, categories,
                   key={c.slug}
                   label={c.name}
                   selected={filters.chain === c.slug}
-                  onPress={() => onChange({ ...filters, chain: filters.chain === c.slug ? undefined : c.slug })}
+                  onPress={() =>
+                    onChange({
+                      ...filters,
+                      chain: filters.chain === c.slug ? undefined : c.slug,
+                    })
+                  }
                 />
               ))}
             </Group>
             <Group title="Ofertas">
-              <Chip label="Solo ofertas" selected={!!filters.offers} onPress={() => onChange({ ...filters, offers: filters.offers ? undefined : true })} />
+              <Chip
+                label="Solo ofertas"
+                selected={!!filters.offers}
+                onPress={() =>
+                  onChange({
+                    ...filters,
+                    offers: filters.offers ? undefined : true,
+                  })
+                }
+              />
             </Group>
             <Group title="Departamento">
               {categories.map((c) => (
@@ -84,7 +139,8 @@ export function FilterSheet({ open, onClose, filters, total, chains, categories,
                   onPress={() =>
                     onChange({
                       ...filters,
-                      category: filters.category === c.slug ? undefined : c.slug,
+                      category:
+                        filters.category === c.slug ? undefined : c.slug,
                       subcategory: undefined,
                     })
                   }
@@ -98,7 +154,13 @@ export function FilterSheet({ open, onClose, filters, total, chains, categories,
                     key={a.slug}
                     label={`${a.name} · ${a.count}`}
                     selected={filters.subcategory === a.slug}
-                    onPress={() => onChange({ ...filters, subcategory: filters.subcategory === a.slug ? undefined : a.slug })}
+                    onPress={() =>
+                      onChange({
+                        ...filters,
+                        subcategory:
+                          filters.subcategory === a.slug ? undefined : a.slug,
+                      })
+                    }
                   />
                 ))}
               </Group>
@@ -106,7 +168,11 @@ export function FilterSheet({ open, onClose, filters, total, chains, categories,
           </ScrollView>
           <View className="px-4 pb-6 pt-2">
             <Button
-              title={total === null ? "Ver los productos" : `Ver ${total.toLocaleString("es-CL")} ${total === 1 ? "producto" : "productos"}`}
+              title={
+                total === null
+                  ? 'Ver los productos'
+                  : `Ver ${total.toLocaleString('es-CL')} ${total === 1 ? 'producto' : 'productos'}`
+              }
               onPress={onClose}
             />
           </View>

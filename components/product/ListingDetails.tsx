@@ -1,19 +1,29 @@
-import { Fragment, useState } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
-import { Button, ChainPill, ErrorState } from "@/components/ui";
-import { errorMessage } from "@/lib/api/errors";
-import { useListings } from "@/lib/api/queries";
-import { timeAgo } from "@/lib/format";
-import { availabilityLabel, extraSpecs, htmlToText, listingHasContent, ratingLabel, sentence } from "@/lib/product-view";
-import { openExternal } from "@/lib/open-external";
-import { useTheme } from "@/theme/useTheme";
-import type { ListingDTO, SectionDTO } from "@/types/api";
+import { Fragment, useState } from 'react';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import { Button, ChainPill, ErrorState } from '@/components/ui';
+import { errorMessage } from '@/lib/api/errors';
+import { useListings } from '@/lib/api/queries';
+import { timeAgo } from '@/lib/format';
+import {
+  availabilityLabel,
+  extraSpecs,
+  htmlToText,
+  listingHasContent,
+  ratingLabel,
+  sentence,
+} from '@/lib/product-view';
+import { openExternal } from '@/lib/open-external';
+import { useTheme } from '@/theme/useTheme';
+import type { ListingDTO, SectionDTO } from '@/types/api';
 
 function FactRow({ label, value }: { label: string; value: string }) {
   return (
     <View className="flex-row justify-between gap-4 border-b border-line py-2">
       <Text className="flex-1 font-sans text-sm text-muted">{label}</Text>
-      <Text selectable className="flex-1 text-right font-sans-semibold text-sm text-ink">
+      <Text
+        selectable
+        className="flex-1 text-right font-sans-semibold text-sm text-ink"
+      >
         {value}
       </Text>
     </View>
@@ -23,11 +33,18 @@ function FactRow({ label, value }: { label: string; value: string }) {
 function Section({ section }: { section: SectionDTO }) {
   return (
     <View className="gap-1">
-      <Text accessibilityRole="header" className="font-sans-bold text-sm text-ink">
+      <Text
+        accessibilityRole="header"
+        className="font-sans-bold text-sm text-ink"
+      >
         {section.title}
       </Text>
       {section.paragraphs.map((p, i) => (
-        <Text key={i} selectable className="font-sans text-sm leading-5 text-muted">
+        <Text
+          key={i}
+          selectable
+          className="font-sans text-sm leading-5 text-muted"
+        >
           {sentence(p)}
         </Text>
       ))}
@@ -38,7 +55,10 @@ function Section({ section }: { section: SectionDTO }) {
         <View className="mt-1 overflow-hidden rounded-xl border border-line">
           <View className="flex-row bg-surface-2 px-3 py-2">
             {section.table.head.map((h, i) => (
-              <Text key={i} className={`flex-1 font-sans-bold text-xs text-muted ${i > 0 ? "text-right" : ""}`}>
+              <Text
+                key={i}
+                className={`flex-1 font-sans-bold text-xs text-muted ${i > 0 ? 'text-right' : ''}`}
+              >
                 {h}
               </Text>
             ))}
@@ -48,7 +68,7 @@ function Section({ section }: { section: SectionDTO }) {
               {row.map((cell, ci) => (
                 <Text
                   key={ci}
-                  className={`flex-1 text-sm ${ci === 0 ? "font-sans-semibold text-ink" : "text-right font-sans text-muted"}`}
+                  className={`flex-1 text-sm ${ci === 0 ? 'font-sans-semibold text-ink' : 'text-right font-sans text-muted'}`}
                 >
                   {cell}
                 </Text>
@@ -61,7 +81,13 @@ function Section({ section }: { section: SectionDTO }) {
   );
 }
 
-function ListingCard({ listing: l, contentOff }: { listing: ListingDTO; contentOff: boolean }) {
+function ListingCard({
+  listing: l,
+  contentOff,
+}: {
+  listing: ListingDTO;
+  contentOff: boolean;
+}) {
   const hasContent = listingHasContent(l);
   const availability = availabilityLabel(l.availability);
   const rating = ratingLabel(l.rating, l.review_count);
@@ -69,8 +95,16 @@ function ListingCard({ listing: l, contentOff }: { listing: ListingDTO; contentO
     <View className="gap-3 rounded-2xl border border-line bg-surface p-4">
       <View className="flex-row flex-wrap items-center gap-x-3 gap-y-1">
         <ChainPill name={l.chain.name} color={l.chain.color} />
-        {availability ? <Text className="font-sans-semibold text-sm text-muted">{availability}</Text> : null}
-        {rating ? <Text className="font-sans-semibold text-sm text-muted">{rating}</Text> : null}
+        {availability ? (
+          <Text className="font-sans-semibold text-sm text-muted">
+            {availability}
+          </Text>
+        ) : null}
+        {rating ? (
+          <Text className="font-sans-semibold text-sm text-muted">
+            {rating}
+          </Text>
+        ) : null}
       </View>
 
       {hasContent ? (
@@ -81,7 +115,9 @@ function ListingCard({ listing: l, contentOff }: { listing: ListingDTO; contentO
             </Text>
           ) : null}
           {l.categories.length > 0 ? (
-            <Text className="font-sans text-xs text-muted">{l.categories.map(sentence).join(" › ")}</Text>
+            <Text className="font-sans text-xs text-muted">
+              {l.categories.map(sentence).join(' › ')}
+            </Text>
           ) : null}
           {extraSpecs(l).map(([k, v]) => (
             <FactRow key={k} label={k} value={v} />
@@ -91,14 +127,14 @@ function ListingCard({ listing: l, contentOff }: { listing: ListingDTO; contentO
           ))}
           <Text className="font-sans text-xs text-muted">
             Fuente: ficha de {l.chain.name}
-            {l.detail_at ? `, leída ${timeAgo(l.detail_at)}` : ""}.
+            {l.detail_at ? `, leída ${timeAgo(l.detail_at)}` : ''}.
           </Text>
         </>
       ) : (
         <Text className="font-sans text-sm text-muted">
           {contentOff
-            ? "PayRight no muestra el contenido de las fichas de las cadenas en esta versión."
-            : `${l.chain.name} no publica una ficha que podamos leer para este producto.`}{" "}
+            ? 'PayRight no muestra el contenido de las fichas de las cadenas en esta versión.'
+            : `${l.chain.name} no publica una ficha que podamos leer para este producto.`}{' '}
           Su precio está en la comparación y su web, a un toque.
         </Text>
       )}
@@ -119,7 +155,13 @@ function ListingCard({ listing: l, contentOff }: { listing: ListingDTO; contentO
  * "Detalle por cadena": lo que dice la página de cada cadena. Pesado, así que no se pide hasta que la persona
  * lo abre. Con `retailer_content = false` la API entrega fichas vacías y aquí se dice, no se rellena.
  */
-export function ListingDetails({ slug, contentOff }: { slug: string; contentOff: boolean }) {
+export function ListingDetails({
+  slug,
+  contentOff,
+}: {
+  slug: string;
+  contentOff: boolean;
+}) {
   const { colors } = useTheme();
   const [open, setOpen] = useState(false);
   const { data, isPending, isError, error, refetch } = useListings(slug, open);
@@ -130,14 +172,21 @@ export function ListingDetails({ slug, contentOff }: { slug: string; contentOff:
         onPress={() => setOpen((o) => !o)}
         accessibilityRole="button"
         accessibilityState={{ expanded: open }}
-        accessibilityLabel={`Detalle por cadena, ${open ? "abierto" : "cerrado"}`}
+        accessibilityLabel={`Detalle por cadena, ${open ? 'abierto' : 'cerrado'}`}
         className="min-h-[52px] flex-row items-center justify-between gap-3 rounded-2xl border border-line bg-surface px-4 py-3 active:opacity-70"
       >
         <View className="flex-1">
-          <Text className="font-display-extrabold text-lg text-ink">Detalle por cadena</Text>
-          <Text className="font-sans text-sm text-muted">Descripción, ingredientes y tabla nutricional que publica cada cadena.</Text>
+          <Text className="font-display-extrabold text-lg text-ink">
+            Detalle por cadena
+          </Text>
+          <Text className="font-sans text-sm text-muted">
+            Descripción, ingredientes y tabla nutricional que publica cada
+            cadena.
+          </Text>
         </View>
-        <Text className="font-sans-bold text-xl text-muted">{open ? "⌃" : "⌄"}</Text>
+        <Text className="font-sans-bold text-xl text-muted">
+          {open ? '⌃' : '⌄'}
+        </Text>
       </Pressable>
 
       {open ? (
@@ -145,22 +194,29 @@ export function ListingDetails({ slug, contentOff }: { slug: string; contentOff:
           data.length > 0 ? (
             <Fragment>
               {data.map((l) => (
-                <ListingCard key={`${l.chain.slug}-${l.url}`} listing={l} contentOff={contentOff} />
+                <ListingCard
+                  key={`${l.chain.slug}-${l.url}`}
+                  listing={l}
+                  contentOff={contentOff}
+                />
               ))}
             </Fragment>
           ) : (
             <View className="rounded-2xl border border-line bg-surface p-4">
               <Text className="font-sans text-sm text-muted">
                 {contentOff
-                  ? "PayRight no muestra las fichas de las cadenas en esta versión."
-                  : "Ninguna cadena publica una ficha que podamos leer para este producto."}
+                  ? 'PayRight no muestra las fichas de las cadenas en esta versión.'
+                  : 'Ninguna cadena publica una ficha que podamos leer para este producto.'}
               </Text>
             </View>
           )
         ) : isError ? (
           <ErrorState message={errorMessage(error)} onRetry={() => refetch()} />
         ) : isPending ? (
-          <View className="items-center py-6" accessibilityLabel="Cargando las fichas de las cadenas">
+          <View
+            className="items-center py-6"
+            accessibilityLabel="Cargando las fichas de las cadenas"
+          >
             <ActivityIndicator color={colors.muted} />
           </View>
         ) : null

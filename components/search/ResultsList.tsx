@@ -1,11 +1,24 @@
-import { useCallback, useState, type ReactElement } from "react";
-import { ActivityIndicator, FlatList, RefreshControl, Text, View } from "react-native";
-import { Button, EmptyState, ErrorState, LoadingList, Notice, ProductCard } from "@/components/ui";
-import type { SearchFilters } from "@/lib/api/client";
-import { errorMessage } from "@/lib/api/errors";
-import { useSearch } from "@/lib/api/queries";
-import { useTheme } from "@/theme/useTheme";
-import type { ProductDTO } from "@/types/api";
+import { useCallback, useState, type ReactElement } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
+  Text,
+  View,
+} from 'react-native';
+import {
+  Button,
+  EmptyState,
+  ErrorState,
+  LoadingList,
+  Notice,
+  ProductCard,
+} from '@/components/ui';
+import type { SearchFilters } from '@/lib/api/client';
+import { errorMessage } from '@/lib/api/errors';
+import { useSearch } from '@/lib/api/queries';
+import { useTheme } from '@/theme/useTheme';
+import type { ProductDTO } from '@/types/api';
 
 type Props = {
   filters: SearchFilters;
@@ -23,10 +36,26 @@ const keyOf = (p: ProductDTO) => p.slug;
  * Resultados de búsqueda con scroll infinito: las cuatro pantallas de cualquier lista que carga datos
  * (cargando, error con reintento, vacío, contenido). Una página que falla al refrescar deja la lista y avisa.
  */
-export function ResultsList({ filters, enabled = true, onOpenProduct, onClearFilters, header = null }: Props) {
+export function ResultsList({
+  filters,
+  enabled = true,
+  onOpenProduct,
+  onClearFilters,
+  header,
+}: Props) {
   const { colors } = useTheme();
   const search = useSearch(filters, enabled);
-  const { data, isPending, isError, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage, isFetchNextPageError } = search;
+  const {
+    data,
+    isPending,
+    isError,
+    error,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetchNextPageError,
+  } = search;
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = useCallback(async () => {
@@ -39,13 +68,15 @@ export function ResultsList({ filters, enabled = true, onOpenProduct, onClearFil
   }, [refetch]);
 
   const renderItem = useCallback(
-    ({ item }: { item: ProductDTO }) => <ProductCard product={item} onPress={() => onOpenProduct(item.slug)} />,
+    ({ item }: { item: ProductDTO }) => (
+      <ProductCard product={item} onPress={() => onOpenProduct(item.slug)} />
+    ),
     [onOpenProduct],
   );
 
   if (!data) {
     return (
-      <View className="flex-1">
+      <View className="flex-1 px-4">
         {header}
         {isError ? (
           <ErrorState message={errorMessage(error)} onRetry={() => refetch()} />
@@ -65,24 +96,41 @@ export function ResultsList({ filters, enabled = true, onOpenProduct, onClearFil
       keyExtractor={keyOf}
       renderItem={renderItem}
       style={{ opacity: dimmed ? 0.55 : 1 }}
-      contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32, gap: 12 }}
+      contentContainerStyle={{
+        paddingHorizontal: 16,
+        paddingBottom: 32,
+        gap: 12,
+      }}
       contentInsetAdjustmentBehavior="automatic"
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="on-drag"
       onEndReached={() => {
-        if (hasNextPage && !isFetchingNextPage && !isFetchNextPageError) void fetchNextPage();
+        if (hasNextPage && !isFetchingNextPage && !isFetchNextPageError)
+          void fetchNextPage();
       }}
       onEndReachedThreshold={0.6}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.muted} />}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor={colors.muted}
+        />
+      }
       ListHeaderComponent={
         <View className="gap-3 pb-1">
           {header}
           {isError && !isFetchNextPageError ? (
-            <Notice tone="warn">No pudimos actualizar la lista. Te mostramos lo último que cargó.</Notice>
+            <Notice tone="warn">
+              No pudimos actualizar la lista. Te mostramos lo último que cargó.
+            </Notice>
           ) : null}
           {items.length > 0 ? (
-            <Text accessibilityRole="header" className="font-sans-semibold text-sm text-muted">
-              {total.toLocaleString("es-CL")} {total === 1 ? "producto" : "productos"}
+            <Text
+              accessibilityRole="header"
+              className="font-sans-semibold text-sm text-muted"
+            >
+              {total.toLocaleString('es-CL')}{' '}
+              {total === 1 ? 'producto' : 'productos'}
             </Text>
           ) : null}
         </View>
@@ -90,31 +138,48 @@ export function ResultsList({ filters, enabled = true, onOpenProduct, onClearFil
       ListEmptyComponent={
         <View>
           <EmptyState
-            title={onClearFilters ? "Nada con estos filtros" : "No encontramos ese producto"}
+            title={
+              onClearFilters
+                ? 'Nada con estos filtros'
+                : 'No encontramos ese producto'
+            }
             hint={
               onClearFilters
-                ? "Prueba quitando alguno: puede que esa cadena no lo venda o que no esté en oferta."
-                : "Prueba con otra palabra o escanea el código de barras del envase."
+                ? 'Prueba quitando alguno: puede que esa cadena no lo venda o que no esté en oferta.'
+                : 'Prueba con otra palabra o escanea el código de barras del envase.'
             }
           />
           {onClearFilters ? (
             <View className="items-center pt-2">
-              <Button title="Quitar los filtros" variant="secondary" onPress={onClearFilters} />
+              <Button
+                title="Quitar los filtros"
+                variant="secondary"
+                onPress={onClearFilters}
+              />
             </View>
           ) : null}
         </View>
       }
       ListFooterComponent={
         isFetchingNextPage ? (
-          <View className="items-center py-4" accessibilityLabel="Cargando más productos">
+          <View
+            className="items-center py-4"
+            accessibilityLabel="Cargando más productos"
+          >
             <ActivityIndicator color={colors.muted} />
           </View>
         ) : isFetchNextPageError ? (
           <View className="items-center gap-2 py-4">
-            <Text className="font-sans text-sm text-muted">No pudimos cargar más productos.</Text>
-            <Button title="Reintentar" variant="secondary" onPress={() => void fetchNextPage()} />
+            <Text className="font-sans text-sm text-muted">
+              No pudimos cargar más productos.
+            </Text>
+            <Button
+              title="Reintentar"
+              variant="secondary"
+              onPress={() => void fetchNextPage()}
+            />
           </View>
-        ) : null
+        ) : undefined
       }
     />
   );

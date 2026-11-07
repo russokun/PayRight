@@ -3,7 +3,7 @@ import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { GoButton } from '@/components/product/GoButton';
 import { Button, ChainPill, SourceTag, Tag, sourceLabel } from '@/components/ui';
-import { chainNote, coverageLabel, missingLabel, missingNames, productsCount, standing, standingLabel } from '@/lib/cart/quote-view';
+import { chainNote, coverageLabel, missingLabel, missingNames, productsCount, standing, standingLabel, storeLabel } from '@/lib/cart/quote-view';
 import { km, money } from '@/lib/format';
 import { openDirections } from '@/lib/maps';
 import { openExternal } from '@/lib/open-external';
@@ -26,7 +26,7 @@ function Where({ chain }: { chain: QuoteChainDTO }) {
   if (!store) {
     return <Text className="font-sans text-sm text-muted">Tienda en línea de {chain.name}</Text>;
   }
-  const place = [store.name, store.commune].filter(Boolean).join(' · ');
+  const place = storeLabel(store);
   return (
     <View className="gap-2">
       <View className="gap-0.5">

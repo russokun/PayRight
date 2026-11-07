@@ -9,7 +9,7 @@ import { Button, ChainPill, EmptyState, ErrorState, LoadingList, Notice } from '
 import { useCartQuote } from '@/lib/api/cart-queries';
 import { errorMessage } from '@/lib/api/errors';
 import { useMeta } from '@/lib/api/queries';
-import { absentLabel, headline, winnerOf } from '@/lib/cart/quote-view';
+import { absentLabel, headline, storeLabel, winnerOf } from '@/lib/cart/quote-view';
 import { km, money } from '@/lib/format';
 import { openDirections } from '@/lib/maps';
 import { tabularNums } from '@/theme/typography';
@@ -62,7 +62,7 @@ function Banner({ quote }: { quote: QuoteDTO }) {
       {store ? (
         <View className="gap-2">
           <Text className="font-sans text-sm leading-5 text-field-ink opacity-90">
-            {`En ${store.name}, ${store.commune}${chain.distance_km != null ? ` · a ${km(chain.distance_km)}` : ''}`}
+            {`En ${storeLabel(store, ', ')}${chain.distance_km != null ? ` · a ${km(chain.distance_km)}` : ''}`}
           </Text>
           <View className="items-start">
             <Button

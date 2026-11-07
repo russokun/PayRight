@@ -15,6 +15,7 @@ import {
   standing,
   standingLabel,
   stopsLabel,
+  storeLabel,
   summaryLine,
   winnerOf,
 } from './quote-view';
@@ -210,5 +211,15 @@ describe('summaryLine', () => {
   });
   it('sin cadenas, que no hay precios', () => {
     assert.equal(summaryLine({ ...QUOTE_COMPARABLE, chains: [] }), 'Todavía no hay precios para tu lista');
+  });
+});
+
+describe('storeLabel', () => {
+  it('añade la comuna solo si el nombre no la trae', () => {
+    assert.equal(storeLabel({ name: 'Jumbo Costanera', commune: 'Providencia' }), 'Jumbo Costanera · Providencia');
+    assert.equal(storeLabel({ name: 'Líder Ñuñoa', commune: 'Ñuñoa' }), 'Líder Ñuñoa');
+    assert.equal(storeLabel({ name: 'Líder Ñuñoa', commune: 'ñuñoa' }, ', '), 'Líder Ñuñoa');
+    assert.equal(storeLabel({ name: 'Jumbo', commune: '' }), 'Jumbo');
+    assert.equal(storeLabel({ name: 'Jumbo Costanera', commune: 'Providencia' }, ', '), 'Jumbo Costanera, Providencia');
   });
 });

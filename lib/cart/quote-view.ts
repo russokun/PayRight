@@ -187,3 +187,13 @@ export function stopsLabel(n: number): string {
 export function itemName(items: readonly Pick<QuoteItemDTO, 'slug' | 'name'>[], slug: string): string {
   return items.find((i) => i.slug === slug)?.name ?? slug;
 }
+
+/**
+ * «Líder Ñuñoa · Providencia» repite la comuna cuando el nombre del local ya la trae (como en `PriceRow`): solo se añade
+ * la comuna si el nombre no la dice.
+ */
+export function storeLabel(store: { name: string; commune: string }, separator = ' · '): string {
+  const commune = store.commune?.trim();
+  const repeats = !!commune && store.name.toLowerCase().includes(commune.toLowerCase());
+  return [store.name, repeats ? '' : commune].filter(Boolean).join(separator);
+}

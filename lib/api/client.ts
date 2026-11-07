@@ -58,6 +58,10 @@ export type RequestOptions = {
   signal?: AbortSignal;
   /** Por defecto `REQUEST_TIMEOUT_MS`. */
   timeoutMs?: number;
+  /** Por defecto `GET`. */
+  method?: 'GET' | 'POST';
+  /** Cuerpo JSON (solo con `POST`). */
+  body?: unknown;
 };
 
 export type SearchSort = 'relevancia' | 'barato' | 'ahorro';
@@ -78,7 +82,8 @@ export type SearchPage = { items: ProductDTO[]; page: PageMeta };
 /** Ubicación opcional para medir distancias: solo si la persona la dio (bloque 5). */
 export type LocationParam = { lat: number; lng: number } | { comuna: string };
 
-type Envelope<T> = { data: T; meta?: PageMeta };
+/** El sobre de la API: `meta` depende del recurso (`PageMeta` en listas, ubicación y radio en «Cerca»…). */
+export type Envelope<T, M = PageMeta> = { data: T; meta?: M };
 
 const DEFAULT_MESSAGES: Record<ApiErrorCode, string> = {
   invalid_request: 'Revisa los datos de la consulta.',
@@ -131,11 +136,12 @@ function abortError(): Error {
   return e;
 }
 
-async function request<T>(
+/** Pedido genérico a la API v1 (GET o POST JSON): lo usan los módulos `lib/api/*-client.ts` de cada bloque. */
+export async function request<T, M = PageMeta>(
   path: string,
   query: Record<string, string | number | boolean | undefined> | undefined,
   opts: RequestOptions,
-): Promise<Envelope<T>> {
+): Promise<Envelope<T, M>> {
   // ya cancelada: ni siquiera se pide
   if (opts.signal?.aborted)
     throw opts.signal.reason instanceof Error
@@ -155,7 +161,12 @@ async function request<T>(
     let res: Response;
     try {
       res = await fetch(buildUrl(path, query), {
-        headers: { Accept: 'application/json' },
+        method: opts.method ?? 'GET',
+        headers:
+          opts.body === undefined
+            ? { Accept: 'application/json' }
+            : { Accept: 'application/json', 'Content-Type': 'application/json' },
+        body: opts.body === undefined ? undefined : JSON.stringify(opts.body),
         signal: controller.signal,
       });
     } catch (e) {
@@ -213,7 +224,7 @@ async function request<T>(
         },
       );
     }
-    return body as Envelope<T>;
+    return body as Envelope<T, M>;
   } finally {
     clearTimeout(timer);
     outer?.removeEventListener('abort', forward);

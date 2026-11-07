@@ -30,7 +30,8 @@ export const queryKeys = {
   all: ['api'] as const,
   meta: () => ['api', 'meta'] as const,
   search: (filters: SearchFilters) => ['api', 'search', filters] as const,
-  product: (slug: string) => ['api', 'product', slug] as const,
+  product: (slug: string, loc?: { lat: number; lng: number } | null) =>
+    ['api', 'product', slug, loc?.lat ?? null, loc?.lng ?? null] as const,
   listings: (slug: string) => ['api', 'product', slug, 'listings'] as const,
   trend: (slug: string) => ['api', 'product', slug, 'trend'] as const,
   categories: (aisles: boolean) => ['api', 'categories', aisles] as const,
@@ -91,11 +92,14 @@ export function useSearch(filters: SearchFilters, enabled = true) {
   });
 }
 
-export function useProduct(slug: string) {
+export function useProduct(
+  slug: string,
+  /** `useApiLocation()` de la pantalla: con ubicación, la ficha trae distancias y la sucursal más cercana. */
+  loc?: { lat: number; lng: number } | null,
+) {
   return useQuery({
-    queryKey: queryKeys.product(slug),
-    // la ubicación llega con el bloque 5: por ahora no se envía lat/lng
-    queryFn: ({ signal }) => getProduct(slug, undefined, { signal }),
+    queryKey: queryKeys.product(slug, loc),
+    queryFn: ({ signal }) => getProduct(slug, loc ?? undefined, { signal }),
     staleTime: STALE.product,
     enabled: slug.length > 0,
   });

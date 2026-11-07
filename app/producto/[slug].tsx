@@ -15,6 +15,7 @@ import {
 } from '@/components/ui';
 import { errorMessage, isNotFound } from '@/lib/api/errors';
 import { useMeta, useProduct } from '@/lib/api/queries';
+import { useApiLocation } from '@/store/useLocationStore';
 import { timeAgo } from '@/lib/format';
 import { openExternal } from '@/lib/open-external';
 import { comparisonNotices, hasWebPrices } from '@/lib/product-view';
@@ -28,7 +29,8 @@ export default function ProductScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const { slug } = useLocalSearchParams<{ slug: string }>();
-  const product = useProduct(slug ?? '');
+  const location = useApiLocation();
+  const product = useProduct(slug ?? '', location);
   const meta = useMeta();
 
   const renderPrice = useCallback(

@@ -29,7 +29,14 @@
           "cameraPermission": "PayRight usa la cámara para escanear códigos de barras y fotografiar precios de góndola."
         }
       ],
-      "expo-image"
+      "expo-image",
+      "expo-sqlite",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "PayRight usa tu ubicación para mostrarte los supermercados y los precios más cercanos a ti."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

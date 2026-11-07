@@ -182,3 +182,158 @@ export type TrendDTO = { points: TrendPointDTO[]; median_price: number | null };
 export type AisleDTO = { slug: string; name: string; count: number };
 /** `GET /categories[?aisles=true]`: departments with how many products each has. */
 export type DepartmentDTO = CategoryDTO & { count: number; aisles?: AisleDTO[] };
+
+// ---------------------------------------------------------------------------------------------
+// Cart quote (block 4): the cart lives on the device; the server only prices it, statelessly.
+// ---------------------------------------------------------------------------------------------
+
+/** A physical branch (a chain's web store has none). */
+export type StoreRefDTO = { id: number; name: string; commune: string; address: string; lat: number; lng: number };
+
+/** `POST /cart/quote` body. At most 60 distinct products, quantity 1–99; coordinates win over `comuna`. */
+export type QuoteRequestDTO = {
+  items: { slug: string; qty: number }[];
+  location?: { lat: number; lng: number } | { comuna: string };
+};
+
+export type QuoteItemDTO = {
+  slug: string;
+  name: string;
+  brand: string;
+  size: string;
+  emoji: string;
+  image_url: string | null;
+  qty: number;
+};
+
+/** One product at one chain. */
+export type QuoteCellDTO = {
+  /** `unit_price` × the quantity in the cart. */
+  price: number;
+  unit_price: number;
+  source: PriceSourceDTO;
+  verified: boolean;
+  /** The chain's own page can be opened through `GET /products/:slug/go?chain=`. */
+  can_go: boolean;
+};
+
+export type QuoteChainDTO = {
+  slug: string;
+  name: string;
+  color: string;
+  /** The cheapest single place to buy the whole cart (or what it has of it) at this chain; null for its web store. */
+  store: StoreRefDTO | null;
+  distance_km: number | null;
+  total: number;
+  /** How many of the cart's products this chain has a price for. */
+  has: number;
+  /** It has every product, so its total compares like for like. */
+  complete: boolean;
+  /** How much more than the winner; null unless both are complete. */
+  diff: number | null;
+  /** Slugs of the products this chain has no price for. */
+  missing: string[];
+  /** By product slug. */
+  cells: Record<string, QuoteCellDTO>;
+  /** The chain's website, when it is a known retailer. */
+  site: string | null;
+};
+
+/** "The cheapest item anywhere" route: the stops of one shopping trip. */
+export type QuoteMixDTO = {
+  total: number;
+  saving_vs_best: number;
+  stops: {
+    store: StoreRefDTO | null;
+    store_name: string;
+    chain_color: string;
+    subtotal: number;
+    items: { slug: string; qty: number; unit_price: number; source: PriceSourceDTO }[];
+  }[];
+};
+
+export type QuoteDTO = {
+  items: QuoteItemDTO[];
+  /** Best first: the whole list before part of it, then the lower total. */
+  chains: QuoteChainDTO[];
+  /** Chains PayRight lists that have no price for anything in the cart. */
+  absent: string[];
+  /** The winner has the whole list, so totals compare like for like. */
+  comparable: boolean;
+  vs_worst: { chain: string; amount: number } | null;
+  vs_second: { chain: string; amount: number } | null;
+  mix: QuoteMixDTO | null;
+  /** Slugs in the request that no longer exist (a stale cart). They are not priced. */
+  unknown_slugs: string[];
+  location: { lat: number; lng: number; place: string } | null;
+  /** The web's shareable list link and the WhatsApp text for it (what the web shares). */
+  share: { url: string; message: string };
+};
+
+// ---------------------------------------------------------------------------------------------
+// Near me and "go to the store" (block 5)
+// ---------------------------------------------------------------------------------------------
+
+export type NearbyDTO = {
+  product: { slug: string; name: string; brand: string; size: string; emoji: string; category: string; image_url: string | null };
+  price: number;
+  list_price: number | null;
+  ppum: number | null;
+  ppum_unit: string | null;
+  store_name: string;
+  chain: { name: string; color: string };
+  distance_km: number;
+  /** The price is the chain's web price, attributed to its nearest branch (the web does not say which branch). */
+  via_web: boolean;
+  verified: boolean;
+  source: PriceSourceDTO;
+  seen_at: string;
+  /** False for `partner` prices: say "recibido hace…". */
+  seen_at_exact: boolean;
+  /** How much cheaper than the product's priciest price anywhere, in percent. */
+  saving_pct: number;
+};
+
+/** `meta` of `GET /nearby`. */
+export type NearbyMeta = { location: { lat: number; lng: number; place: string }; radius_km: number };
+
+export type StoreDTO = StoreRefDTO & {
+  chain: { slug: string; name: string; color: string };
+  distance_km: number;
+  /** Where the branch comes from: the chain's own locator, `osm` (needs attribution) or the community. */
+  source: string;
+};
+
+/** `GET /stores`: each chain's nearest branch (every option, however far) and the nearest branches of any chain. */
+export type StoresDTO = { per_chain: StoreDTO[]; nearest: StoreDTO[] };
+
+/** `meta` of `GET /stores`. `attribution` is set when any branch comes from OpenStreetMap: the app must show it. */
+export type StoresMeta = { location: { lat: number; lng: number; place: string }; attribution: string | null };
+
+export type CommuneDTO = { name: string; /** What `?comuna=` takes: "region-slug|Comuna". */ value: string; lat: number; lng: number };
+export type RegionDTO = { slug: string; name: string; communes: CommuneDTO[] };
+
+/** What the check of one chain's page found. */
+export type GoStatus = "verified" | "changed" | "gone" | "failed" | "not_checked";
+
+export type GoOptionDTO = {
+  chain: { slug: string; name: string; color: string };
+  /** The chain's page for this product (https, a known retailer). */
+  url: string;
+  price: number;
+  list_price: number | null;
+  /** PayRight reads this chain's page itself; otherwise the price is the reference one a partner shared. */
+  live: boolean;
+  available: boolean;
+  status: GoStatus;
+  /** The price before the check, when it `changed`. */
+  previous_price: number | null;
+  seen_at: string | null;
+  checked_at: string | null;
+};
+
+/**
+ * `GET /products/:slug/go[?chain=]`: re-reads the chains PayRight can read (Jumbo, Santa Isabel) right now and says
+ * where to send the person. `target` is the chain slug of the cheapest option with stock, null when no store has it.
+ */
+export type GoDTO = { target: string | null; options: GoOptionDTO[] };

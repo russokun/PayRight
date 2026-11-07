@@ -21,7 +21,10 @@ export function PriceRow({ entry, cheapest = false, onPress }: { entry: PriceDTO
   const community = entry.source === "community";
   const online = entry.store.kind === "online";
 
-  const place = online ? "Tienda en línea" : [entry.store.name, entry.store.commune].filter(Boolean).join(" · ");
+  // "Líder Maipú · Maipú" repite la comuna: solo se añade cuando el nombre de la tienda no la trae
+  const { name, commune } = entry.store;
+  const repeats = !!commune && name.toLowerCase().includes(commune.toLowerCase());
+  const place = online ? "Tienda en línea" : [name, repeats ? "" : commune].filter(Boolean).join(" · ");
   // Un precio web es el de la zona base de la cadena; si hay ubicación, se dice cuál es su sucursal más cercana.
   const near =
     entry.distance_km != null

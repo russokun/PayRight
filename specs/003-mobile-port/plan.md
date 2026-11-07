@@ -1,6 +1,6 @@
 # 003 — Portar payright-web a la app móvil nativa
 
-Estado: bloque 0 (0a saneamiento + 0b SDK 58) y bloque 1 (API `/api/v1` de lectura en payright-web) **terminados**. Siguiente: bloque 2 (tokens y componentes base) y bloque 3 (consumir la API).
+Estado: bloques 0, 1 (API), 2 (tokens y componentes) y 3 (buscar, ficha, escáner, categorías) **terminados**. Siguiente: bloque 4 (carrito y cotizar) y 5 (Cerca).
 Plan elaborado con revisión de arquitectura (Opus) y verificado contra el código de ambos repos.
 Reemplaza a `specs/002-*`, cuyo contrato (Supabase + scraper Python) no coincide con la web real
 (archivado en `specs/_archivo/`).
@@ -40,8 +40,8 @@ Reemplaza a `specs/002-*`, cuyo contrato (Supabase + scraper Python) no coincide
 |---|---|---|---|
 | 0 | Saneamiento + SDK 58 | tsc limpio, bundles ios/android/web, sin datos inventados ✅ | expo-upgrade |
 | 1 ✅ | `/api/v1` lectura en payright-web (`search`, `products/:slug`, `barcode/:ean`, `meta`); contrato en [`api-v1.md`](api-v1.md) | `curl` devuelve datos reales; test unitario del mapeo; `image_url` null con contenido de cadena apagado | — (leer `node_modules/next/dist/docs`, ver AGENTS.md de la web) |
-| 2 | Tokens y componentes base (claro/oscuro, fuentes, PriceBlock, SourceBadge, ProductCard, Button, LabelTile) | cero colores hardcodeados; sigue el tema del sistema | expo-web-to-native (leer una vez), expo-design-system, expo-native-ui |
-| 3 | Buscar, ficha y escáner con datos reales | buscar "leche" → ficha con cadenas, origen y fecha; escanear EAN abre la ficha | expo-data-fetching, expo-router, expo-ui |
+| 2 ✅ | Tokens y componentes base (claro/oscuro, fuentes, PriceBlock, SourceBadge, ProductCard, Button, LabelTile) | cero colores hardcodeados; sigue el tema del sistema | expo-web-to-native (leer una vez), expo-design-system, expo-native-ui |
+| 3 ✅ | Buscar, ficha, escáner y categorías con datos reales | buscar "leche" → ficha con cadenas, origen y fecha; escanear EAN abre la ficha | expo-data-fetching, expo-router, expo-ui |
 | 4 | Carrito y cotizar (local primero) | misma cotización que la web para la misma lista | expo-data-fetching |
 | 5 | Cerca y "Ir al más barato" | sucursal más cercana por cadena con GPS/comuna | expo-native-ui |
 | 6 | Auth Bearer, subir precio con foto, votos, guardados, ranking | foto subida visible en la web | expo-data-fetching |
@@ -62,3 +62,11 @@ Reemplaza a `specs/002-*`, cuyo contrato (Supabase + scraper Python) no coincide
 `npm run typecheck` → `npx expo export --platform ios|android|web` → servir el export web y recorrerlo con Playwright
 a 390×844. **No verifica**: gestos, cámara, ubicación, háptica, rendimiento ni comportamiento en iOS/Android reales;
 eso se prueba en teléfono con `expo-dev-client`/Expo Go.
+
+## Qué NO está verificado (bloques 2 y 3)
+Solo hay verificación por bundle (ios/android) y por render web con Playwright contra la API real (datos de **demostración**).
+Pendiente de probar en teléfono: cámara y permisos del escáner, linterna, háptica, `BottomSheet` de `@expo/ui` (SwiftUI/Compose),
+`presentation: "fullScreenModal"` declarado desde la propia pantalla, fuentes e `inlineRem` en iOS/Android reales, VoiceOver/TalkBack,
+rendimiento de listas, y que `Intl` con zona `America/Santiago` funcione en Hermes. La ficha por cadena (`listings`), `comparison` y `checked_at`
+se probaron con fixtures y tests unitarios, no con un scrape real (la demo no trae fichas de cadena).
+Hallazgo para la web: `alert` sobre `alert-bg` en modo claro da 4,40:1 (bajo AA 4,5:1).

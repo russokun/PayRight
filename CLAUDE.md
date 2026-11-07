@@ -6,6 +6,11 @@ App nativa (Expo SDK 58, expo-router, NativeWind 4, zustand) que porta la experi
 Plan de trabajo por bloques: [`specs/003-mobile-port/plan.md`](specs/003-mobile-port/plan.md).
 Trabajar **un bloque a la vez**, cada uno entregable y verificado.
 
+## Cómo correrlo
+- API: `EXPO_PUBLIC_API_URL` (ver `.env.example`; `localhost` no sirve en emulador Android ni en teléfono real). La API vive en `payright-web` (`docs/api-v1.md`).
+- `npm run typecheck` · `npm test` · `CI=1 EXPO_OFFLINE=1 npx expo export --platform ios|android|web` · galería de componentes: `EXPO_PUBLIC_UI_GALLERY=1` y la ruta `/ui-gallery`.
+- `types/api.ts` es una **copia** de `payright-web/lib/api/v1/dto.ts`: no se edita a mano.
+
 ## Reglas
 - **Nunca datos inventados presentados como reales** (PRODUCT.md de la web). Todo precio lleva
   `source` y `seen_at`; lo que no tenga datos reales dice "Próximamente" o "Demostración".

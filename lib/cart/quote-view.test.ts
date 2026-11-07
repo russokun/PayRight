@@ -12,6 +12,7 @@ import {
   mixSummary,
   shareMessage,
   stopsLabel,
+  summaryLine,
   winnerOf,
 } from './quote-view';
 import { ITEMS, JUMBO, LIDER, QUOTE_COMPARABLE, QUOTE_ONLY_ONE, QUOTE_PARTIAL, UNIMARC } from './quote.fixtures';
@@ -143,8 +144,10 @@ describe('mixSummary', () => {
     assert.equal(m.saving, null);
     assert.match(m.note ?? '', /ninguna tiene toda tu lista/);
   });
-  it('sin mix, nada', () => {
+  it('sin mix, o con una sola parada, nada', () => {
     assert.equal(mixSummary(QUOTE_PARTIAL), null);
+    const one = { ...QUOTE_COMPARABLE, mix: { ...QUOTE_COMPARABLE.mix!, stops: [QUOTE_COMPARABLE.mix!.stops[0]] } };
+    assert.equal(mixSummary(one), null);
   });
 });
 
@@ -156,5 +159,17 @@ describe('textos menores', () => {
   it('itemName cae al slug si no está', () => {
     assert.equal(itemName(ITEMS, 'leche'), 'Leche entera');
     assert.equal(itemName(ITEMS, 'x'), 'x');
+  });
+});
+
+describe('summaryLine', () => {
+  it('con ganador comparable dice cuál y a cuánto', () => {
+    assert.equal(summaryLine(QUOTE_COMPARABLE), 'Más barato: Jumbo · $4.300');
+  });
+  it('si nadie tiene todo no dice «más barato»', () => {
+    assert.equal(summaryLine(QUOTE_PARTIAL), 'Nadie tiene todo · Unimarc tiene 2 de 3');
+  });
+  it('sin cadenas, que no hay precios', () => {
+    assert.equal(summaryLine({ ...QUOTE_COMPARABLE, chains: [] }), 'Todavía no hay precios para tu lista');
   });
 });

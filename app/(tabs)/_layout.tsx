@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import { House, MapPin, Plus, ShoppingCart, Trophy } from 'lucide-react-native';
 import type { ComponentType } from 'react';
 import type { ColorValue } from 'react-native';
+import { useCartTabOptions } from '@/components/cart/CartBadge';
 import { fonts } from '@/theme/fonts';
 import { useTheme } from '@/theme/useTheme';
 
@@ -17,6 +18,7 @@ function icon(Icon: ComponentType<IconProps>) {
 // Mismas 5 secciones que BottomNav de payright-web. Los colores salen de theme/tokens.ts según el esquema.
 export default function TabLayout() {
   const { colors } = useTheme();
+  const cartTab = useCartTabOptions(colors);
   return (
     <Tabs
       screenOptions={{
@@ -30,7 +32,7 @@ export default function TabLayout() {
       <Tabs.Screen name="index" options={{ title: 'Inicio', tabBarIcon: icon(House) }} />
       <Tabs.Screen name="cerca" options={{ title: 'Cerca', tabBarIcon: icon(MapPin) }} />
       <Tabs.Screen name="subir" options={{ title: 'Subir', tabBarIcon: icon(Plus) }} />
-      <Tabs.Screen name="carrito" options={{ title: 'Carrito', tabBarIcon: icon(ShoppingCart) }} />
+      <Tabs.Screen name="carrito" options={{ title: 'Carrito', tabBarIcon: icon(ShoppingCart), ...cartTab }} />
       <Tabs.Screen name="ranking" options={{ title: 'Ranking', tabBarIcon: icon(Trophy) }} />
     </Tabs>
   );

@@ -75,6 +75,17 @@ export function headline(quote: QuoteDTO): Headline | null {
   };
 }
 
+/**
+ * Una línea para la barra del carrito: dónde está más barata la lista. Sin una cadena que tenga todo no dice «más barato»:
+ * dice quién tiene más.
+ */
+export function summaryLine(quote: QuoteDTO): string {
+  const w = winnerOf(quote);
+  if (!w) return 'Todavía no hay precios para tu lista';
+  if (quote.comparable && w.complete) return `Más barato: ${w.chain.name} · ${money(w.chain.total)}`;
+  return `Nadie tiene todo · ${w.chain.name} tiene ${w.chain.has} de ${productsCount(quote)}`;
+}
+
 /** Texto corto bajo el total de cada cadena: «el más barato», «+$1.200» o «total parcial». */
 export function chainNote(quote: QuoteDTO, chain: QuoteChainDTO, index: number): string {
   if (index === 0 && quote.comparable && chain.complete) return 'El más barato';
@@ -123,7 +134,8 @@ export type MixSummary = {
  */
 export function mixSummary(quote: QuoteDTO): MixSummary | null {
   const mix = quote.mix;
-  if (!mix || mix.stops.length === 0) return null;
+  // con una sola parada es lo mismo que comprar en una cadena: no hay ruta que mostrar
+  if (!mix || mix.stops.length < 2) return null;
   const stops = mix.stops.length;
   if (!quote.comparable) {
     return { stops, saving: null, note: 'Es lo más barato de cada producto que tiene precio. No se compara con una sola tienda porque ninguna tiene toda tu lista.' };

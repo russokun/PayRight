@@ -39,7 +39,7 @@ export function PriceBlock({ price, listPrice, ppum, ppumUnit, promoEndsAt, size
     list !== null ? `antes ${money(list)}` : null,
     discount >= 1 ? `${discount} por ciento menos` : null,
     unit ? unit.replace(" / ", " por ") : null,
-    offer,
+    offer?.replace(" · ", ", "),
   ]
     .filter(Boolean)
     .join(", ");
@@ -57,12 +57,23 @@ export function PriceBlock({ price, listPrice, ppum, ppumUnit, promoEndsAt, size
           {discount >= 1 && <Tag>{`−${discount}%`}</Tag>}
         </View>
       )}
-      {(unit || offer) && (
-        <Text className={`mt-0.5 text-[13px] ${right ? "text-right" : ""}`} style={tabularNums}>
-          {unit && <Text className="font-sans-semibold text-muted">{unit}</Text>}
-          {unit && offer ? <Text className="font-sans text-muted">{" · "}</Text> : null}
-          {offer && <Text className={expired ? "font-sans-semibold text-alert" : "font-sans-semibold text-muted"}>{offer}</Text>}
-        </Text>
+      {right ? (
+        <>
+          {unit && (
+            <Text className="mt-0.5 text-right font-sans-semibold text-[13px] text-muted" style={tabularNums}>
+              {unit}
+            </Text>
+          )}
+          {offer && <Text className={`text-right font-sans-semibold text-[13px] ${expired ? "text-alert" : "text-muted"}`}>{offer}</Text>}
+        </>
+      ) : (
+        (unit || offer) && (
+          <Text className="mt-0.5 text-[13px]" style={tabularNums}>
+            {unit && <Text className="font-sans-semibold text-muted">{unit}</Text>}
+            {unit && offer ? <Text className="font-sans text-muted">{" · "}</Text> : null}
+            {offer && <Text className={expired ? "font-sans-semibold text-alert" : "font-sans-semibold text-muted"}>{offer}</Text>}
+          </Text>
+        )
       )}
     </View>
   );

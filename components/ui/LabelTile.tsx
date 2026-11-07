@@ -1,6 +1,7 @@
 import { Image } from "expo-image";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
+import { fitLabel } from "@/theme/label-fit";
 import { categoryTints, defaultCategoryTint, labelInk } from "@/theme/tokens";
 import { useReducedMotion } from "@/theme/useReducedMotion";
 import type { ProductDTO } from "@/types/api";
@@ -27,16 +28,19 @@ export function LabelTile({ product, imageUrl, size = 76 }: { product: TileProdu
   if (imageUrl && !failed) {
     return (
       <View {...hidden} className="overflow-hidden border border-line bg-photo" style={box}>
-        <Image
-          source={{ uri: imageUrl }}
-          contentFit="contain"
-          cachePolicy="disk"
-          placeholder={PLACEHOLDER}
-          transition={reduceMotion ? 0 : 150}
-          recyclingKey={imageUrl}
-          onError={() => setFailed(true)}
-          style={{ width: "100%", height: "100%", padding: 4 }}
-        />
+        {/* el margen va en un View aparte: expo-image no recorta su contenido con el padding propio */}
+        <View className="flex-1 p-1">
+          <Image
+            source={{ uri: imageUrl }}
+            contentFit="contain"
+            cachePolicy="disk"
+            placeholder={PLACEHOLDER}
+            transition={reduceMotion ? 0 : 150}
+            recyclingKey={imageUrl}
+            onError={() => setFailed(true)}
+            style={{ flex: 1 }}
+          />
+        </View>
       </View>
     );
   }
@@ -56,23 +60,21 @@ export function LabelTile({ product, imageUrl, size = 76 }: { product: TileProdu
   const loose = !product.brand || product.brand === "Granel";
   const word = (loose ? product.name.split(" ")[0] : product.brand) || product.name;
   const foot = loose ? "a granel" : product.size;
-  const pad = Math.max(6, Math.round(size * 0.09));
-  // La palabra más larga cabe en una línea: una marca nunca se parte a media palabra ("Miraflor-es").
-  const longest = Math.max(...word.split(/\s+/).map((w) => w.length), 1);
-  const head = Math.max(10, Math.min(Math.round(size * 0.2), 28, Math.floor((size - 2 * pad) / (longest * 0.62))));
+  // La marca se ajusta al recuadro sin partirse a media palabra ("Miraflor-es"); el formato solo si sobra lugar.
+  const fit = fitLabel(word, size, size >= 72 && !!foot);
 
   return (
-    <View {...hidden} className="justify-between overflow-hidden" style={[box, { backgroundColor: tint, padding: pad }]}>
-      <Text style={{ fontSize: Math.round(size * 0.3), lineHeight: Math.round(size * 0.36) }}>{emoji}</Text>
+    <View {...hidden} className="justify-between overflow-hidden" style={[box, { backgroundColor: tint, padding: fit.pad }]}>
+      {fit.emoji > 0 ? <Text style={{ fontSize: fit.emoji, lineHeight: Math.round(fit.emoji * 1.2) }}>{emoji}</Text> : <View />}
       <View>
         <Text
-          numberOfLines={2}
+          numberOfLines={fit.lines}
           className="font-display-extrabold"
-          style={{ color: labelInk, fontSize: head, lineHeight: Math.round(head * 1.08) }}
+          style={{ color: labelInk, fontSize: fit.head, lineHeight: Math.round(fit.head * 1.08) }}
         >
           {word}
         </Text>
-        {size >= 72 && !!foot && (
+        {fit.foot && (
           <Text numberOfLines={1} className="mt-0.5 font-sans-bold" style={{ color: labelInk, fontSize: 11, lineHeight: 13, opacity: 0.75 }}>
             {foot}
           </Text>

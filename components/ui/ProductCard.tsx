@@ -57,12 +57,12 @@ export function ProductCard({ product, onPress }: { product: ProductDTO; onPress
               <View className="mt-1 flex-row flex-wrap items-center gap-x-1.5 gap-y-1">
                 <Text className="font-sans-medium text-xs text-muted">{chains > 1 ? "Más barato en" : "Solo en"}</Text>
                 <ChainPill name={best.chain} color={best.chain_color} />
-                {chains > 1 && <Text className="font-sans-medium text-xs text-muted">{`· ${chains} cadenas`}</Text>}
               </View>
             )}
             {best && (
               <View className="flex-row flex-wrap items-center gap-x-2 gap-y-1">
                 <SourceTag source={best.source} />
+                {chains > 1 && <Text className="font-sans-medium text-xs text-muted">{`${chains} cadenas`}</Text>}
                 {best.verified && (
                   <View className="flex-row items-center gap-0.5">
                     <Check size={13} strokeWidth={3} color={colors.save} />

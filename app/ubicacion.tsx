@@ -209,7 +209,7 @@ export default function LocationScreen() {
             autoCapitalize="none"
             returnKeyType="search"
             accessibilityLabel="Buscar tu comuna"
-            className="min-h-14 flex-1 py-3 font-sans-semibold text-base text-ink"
+            className="min-h-14 flex-1 py-3 font-sans-semibold text-base text-ink outline-none"
             // en web el navegador dibuja su propio contorno al enfocar; el borde del contenedor ya lo indica
             style={{ outlineWidth: 0 }}
           />

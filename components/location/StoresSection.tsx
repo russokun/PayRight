@@ -1,9 +1,10 @@
 import type { UseQueryResult } from '@tanstack/react-query';
 import { ExternalLink } from 'lucide-react-native';
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
-import { EmptyState, ErrorState } from '@/components/ui';
+import { EmptyState, ErrorState, Notice } from '@/components/ui';
 import { errorMessage } from '@/lib/api/errors';
 import type { StoresPage } from '@/lib/api/places-client';
+import { FAR_KM, isFarAway, splitStores } from '@/lib/location/stores';
 import { openSupermarketsNear } from '@/lib/maps';
 import { useTheme } from '@/theme/useTheme';
 import { StoreRow } from './StoreRow';
@@ -21,9 +22,10 @@ export function StoresSection({
 }) {
   const { colors } = useTheme();
   const { data } = query;
-  const perChain = data?.stores.per_chain ?? [];
-  const taken = new Set(perChain.map((s) => s.id));
-  const others = (data?.stores.nearest ?? []).filter((s) => !taken.has(s.id));
+  const { perChain, others } = data
+    ? splitStores(data.stores)
+    : { perChain: [], others: [] };
+  const far = data ? isFarAway(data.stores) : false;
   const attribution = data?.meta.attribution?.trim() || null;
 
   return (
@@ -61,6 +63,11 @@ export function StoresSection({
         />
       ) : (
         <>
+          {far && (
+            <Notice tone="info">
+              {`No hay supermercados a menos de ${FAR_KM} km de tu ubicación. Te mostramos los más cercanos, aunque estén lejos.`}
+            </Notice>
+          )}
           {perChain.length > 0 && (
             <View className="gap-3">
               <Text
@@ -80,7 +87,7 @@ export function StoresSection({
                 accessibilityRole="header"
                 className="font-sans-bold text-sm text-ink"
               >
-                Otros locales cerca
+                Otros locales
               </Text>
               {others.map((s) => (
                 <StoreRow key={`n${s.id}`} store={s} />

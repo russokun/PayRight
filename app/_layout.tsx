@@ -7,6 +7,7 @@ import { View } from 'react-native';
 import { useFonts } from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ToastProvider } from '@/components/ToastProvider';
+import { QueryProvider } from '@/lib/api/QueryProvider';
 import { fontAssets } from '@/theme/font-assets';
 import { useTheme } from '@/theme/useTheme';
 import '../global.css';
@@ -33,12 +34,14 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ToastProvider>
-        <View className="flex-1 bg-bg">
-          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-        </View>
+        <QueryProvider>
+          <View className="flex-1 bg-bg">
+            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="+not-found" />
+            </Stack>
+          </View>
+        </QueryProvider>
         <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       </ToastProvider>
     </SafeAreaProvider>

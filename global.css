@@ -1,3 +1,55 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+ * Tokens de PayRight (payright-web/app/globals.css), como canales RGB separados por espacio para que
+ * funcionen con opacidad (`bg-ink/10` → rgb(var(--ink) / 0.1)). Mismos nombres que la web.
+ * El mismo juego vive en theme/tokens.ts (para StatusBar, pestañas, SVG); theme/tokens.test.ts los compara.
+ *
+ * Modo oscuro: sigue al sistema con `@media (prefers-color-scheme: dark)` sobre `:root`. NativeWind 4 lo
+ * traduce a variables raíz "dark" en nativo (react-native-css-interop, normalize-selectors.ts) y en web es CSS
+ * puro. Lo que no cambia entre temas (accent, accent-ink, highlight, photo) solo se declara en claro.
+ *
+ * Reglas de marca: el lima (accent) marca lo que gana y NUNCA lleva texto sobre fondo claro; save = buen
+ * precio; alert = más caro o aviso.
+ */
+:root {
+  --bg: 250 250 247;
+  --surface: 255 255 255;
+  --surface-2: 238 239 234;
+  --ink: 17 20 16;
+  --muted: 89 94 86;
+  --line: 224 226 219;
+  --primary: 17 20 16;
+  --primary-ink: 250 250 247;
+  --field: 17 20 16;
+  --field-ink: 250 250 247;
+  --accent: 216 255 60;
+  --accent-ink: 17 20 16;
+  --highlight: 216 255 60;
+  --save: 12 107 77;
+  --save-bg: 221 243 232;
+  --alert: 194 58 24;
+  --alert-bg: 251 228 220;
+  --photo: 255 255 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: 17 20 16;
+    --surface: 26 29 24;
+    --surface-2: 36 40 31;
+    --ink: 242 243 238;
+    --muted: 164 169 158;
+    --line: 47 51 43;
+    --primary: 242 243 238;
+    --primary-ink: 17 20 16;
+    --field: 37 42 33;
+    --field-ink: 242 243 238;
+    --save: 95 224 180;
+    --save-bg: 18 58 44;
+    --alert: 255 138 99;
+    --alert-bg: 59 29 20;
+  }
+}

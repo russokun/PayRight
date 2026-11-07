@@ -15,8 +15,15 @@ export type CommuneMatch = {
 
 /** Minúsculas, sin tildes ni diéresis y sin espacios de más: «Ñuñoa» → «nunoa», «Maipú» → «maipu». */
 export function normalizeText(s: string): string {
-  return s
-    .normalize('NFD')
+  // `normalize` existe en Hermes; si faltara, se cubren a mano las letras del español para que la búsqueda no se rompa
+  const decomposed =
+    typeof s.normalize === 'function'
+      ? s.normalize('NFD')
+      : s.replace(
+          /[áéíóúüñÁÉÍÓÚÜÑ]/g,
+          (c) => 'aeiouunAEIOUUN'['áéíóúüñÁÉÍÓÚÜÑ'.indexOf(c)],
+        );
+  return decomposed
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/\s+/g, ' ')

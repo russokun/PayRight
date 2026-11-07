@@ -208,7 +208,6 @@ export default function LocationScreen() {
             autoCorrect={false}
             autoCapitalize="none"
             returnKeyType="search"
-            clearButtonMode="while-editing"
             accessibilityLabel="Buscar tu comuna"
             className="min-h-14 flex-1 py-3 font-sans-semibold text-base text-ink"
             // en web el navegador dibuja su propio contorno al enfocar; el borde del contenedor ya lo indica

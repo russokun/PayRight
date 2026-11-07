@@ -14,8 +14,8 @@ export default function Toast({ message, onHide }: { message: string; onHide?: (
 
   return (
     <Animated.View style={{ position: 'absolute', bottom: 40, left: 20, right: 20, opacity }}>
-      <View className="bg-black/80 px-4 py-3 rounded-xl items-center">
-        <Text className="text-white">{message}</Text>
+      <View className="items-center rounded-xl bg-field px-4 py-3">
+        <Text className="font-sans-semibold text-field-ink">{message}</Text>
       </View>
     </Animated.View>
   );

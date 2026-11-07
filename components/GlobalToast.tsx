@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Animated } from 'react-native';
+import { View, Text } from 'react-native';
 
 type Props = {
   message: string;
@@ -8,8 +8,8 @@ type Props = {
 
 export default function GlobalToast({ message, style }: Props) {
   return (
-    <View style={[{ backgroundColor: '#111827', padding: 12, borderRadius: 10, maxWidth: '90%' }, style]}>
-      <Text style={{ color: '#fff', fontWeight: '600' }}>{message}</Text>
+    <View className="max-w-[90%] rounded-xl bg-field px-3 py-3" style={style}>
+      <Text className="font-sans-semibold text-field-ink">{message}</Text>
     </View>
   );
 }

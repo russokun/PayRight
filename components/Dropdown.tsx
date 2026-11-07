@@ -16,31 +16,31 @@ export default function Dropdown({
   return (
     <>
       <TouchableOpacity
-        className="bg-white border border-gray-200 rounded-xl px-4 py-3"
+        className="rounded-xl border border-line bg-surface px-4 py-3"
         onPress={() => setOpen(true)}
       >
-        <Text>{value || placeholder || 'Seleccionar'}</Text>
+        <Text className="font-sans text-ink">{value || placeholder || 'Seleccionar'}</Text>
       </TouchableOpacity>
       <Modal visible={open} animationType="slide" onRequestClose={() => setOpen(false)} transparent>
-        <View className="flex-1 justify-end bg-black/30">
-          <View className="bg-white p-4 rounded-t-2xl">
+        <View className="flex-1 justify-end bg-ink/30">
+          <View className="rounded-t-2xl bg-surface p-4">
             <FlatList
               data={options}
               keyExtractor={(item) => item}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  className="py-3 border-b border-gray-100"
+                  className="border-b border-line py-3"
                   onPress={() => {
                     onChange(item);
                     setOpen(false);
                   }}
                 >
-                  <Text className="text-base">{item}</Text>
+                  <Text className="font-sans text-base text-ink">{item}</Text>
                 </TouchableOpacity>
               )}
             />
             <TouchableOpacity className="py-3 items-center" onPress={() => setOpen(false)}>
-              <Text className="text-red-600 font-bold">Cerrar</Text>
+              <Text className="font-sans-bold text-ink">Cerrar</Text>
             </TouchableOpacity>
           </View>
         </View>

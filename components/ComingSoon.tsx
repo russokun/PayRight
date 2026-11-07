@@ -14,13 +14,13 @@ type Props = {
  */
 export function ComingSoon({ title, description }: Props) {
   return (
-    <SafeAreaView className="flex-1 bg-[#FAFAF7]" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-bg" edges={['top']}>
       <View className="flex-1 items-center justify-center px-8">
-        <Text className="text-3xl font-bold text-[#111410]">{title}</Text>
-        <Text className="mt-3 text-center text-base text-[#595E56]">{description}</Text>
-        <Text className="mt-6 text-sm font-semibold uppercase tracking-widest text-[#595E56]">
-          Próximamente
+        <Text accessibilityRole="header" className="font-display-extrabold text-3xl text-ink">
+          {title}
         </Text>
+        <Text className="mt-3 text-center font-sans text-base leading-6 text-muted">{description}</Text>
+        <Text className="mt-6 font-sans-bold text-sm uppercase tracking-widest text-muted">Próximamente</Text>
       </View>
     </SafeAreaView>
   );

@@ -43,17 +43,19 @@ export function LoadingList({ count = 4 }: { count?: number }) {
     return () => loop.stop();
   }, [reduceMotion, pulse]);
 
+  // El className va en un View interior: Animated.View solo recibe `style` (la opacidad que late).
   return (
     <Animated.View
       accessibilityRole="progressbar"
       accessibilityLabel="Cargando resultados"
       accessibilityState={{ busy: true }}
-      className="gap-3"
       style={{ opacity: pulse }}
     >
-      {Array.from({ length: count }, (_, i) => (
-        <SkeletonCard key={i} />
-      ))}
+      <View className="gap-3">
+        {Array.from({ length: count }, (_, i) => (
+          <SkeletonCard key={i} />
+        ))}
+      </View>
     </Animated.View>
   );
 }

@@ -2,13 +2,8 @@ import { Tabs } from 'expo-router';
 import { House, MapPin, Plus, ShoppingCart, Trophy } from 'lucide-react-native';
 import type { ComponentType } from 'react';
 import type { ColorValue } from 'react-native';
-
-// Colores provisionales de marca (PRODUCT.md / globals.css de payright-web).
-// El Bloque 2 los reemplaza por tokens (theme/tokens.ts).
-const INK = '#111410';
-const MUTED = '#595E56';
-const SURFACE = '#FFFFFF';
-const LINE = '#E4E6DF';
+import { fonts } from '@/theme/fonts';
+import { useTheme } from '@/theme/useTheme';
 
 type IconProps = { size?: number; color?: string };
 
@@ -19,16 +14,18 @@ function icon(Icon: ComponentType<IconProps>) {
   );
 }
 
-// Mismas 5 secciones que BottomNav de payright-web.
+// Mismas 5 secciones que BottomNav de payright-web. Los colores salen de theme/tokens.ts según el esquema.
 export default function TabLayout() {
+  const { colors } = useTheme();
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: INK,
-        tabBarInactiveTintColor: MUTED,
-        tabBarStyle: { backgroundColor: SURFACE, borderTopColor: LINE },
-        tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.muted,
+        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.line },
+        tabBarLabelStyle: { fontSize: 12, fontFamily: fonts.sansSemibold },
+        sceneStyle: { backgroundColor: colors.bg },
       }}>
       <Tabs.Screen name="index" options={{ title: 'Inicio', tabBarIcon: icon(House) }} />
       <Tabs.Screen name="cerca" options={{ title: 'Cerca', tabBarIcon: icon(MapPin) }} />

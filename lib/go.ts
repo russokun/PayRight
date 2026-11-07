@@ -36,7 +36,10 @@ export function isStoreUrl(url: string): boolean {
 }
 
 /** Cuánto leer el aviso antes de abrir la tienda: un cambio de precio pide más calma que una verificación limpia. */
-export const OPEN_DELAY_MS: Record<'verified' | 'changed' | 'unverified', number> = {
+export const OPEN_DELAY_MS: Record<
+  'verified' | 'changed' | 'unverified',
+  number
+> = {
   verified: 1200,
   changed: 3000,
   unverified: 2500,
@@ -51,7 +54,10 @@ function noneNotice(go: GoDTO, chain: string | undefined): GoNotice {
     const gone = !option || option.status === 'gone' || !option.available;
     return {
       tone: 'none',
-      title: gone && option ? 'Esa tienda ya no tiene el producto' : 'Esa tienda no tiene el producto ahora',
+      title:
+        gone && option
+          ? 'Esa tienda ya no tiene el producto'
+          : 'Esa tienda no tiene el producto ahora',
       detail: 'Puedes mirar el precio en las otras cadenas, más arriba.',
     };
   }
@@ -87,10 +93,13 @@ function openNotice(option: GoOptionDTO, now: number): GoNotice {
   const seen = option.seen_at
     ? ` (${option.live ? 'visto' : 'recibido'} ${timeAgo(option.seen_at, now)})`
     : '';
-  const reads = option.live ? '' : `PayRight no lee directamente la web de ${name}: su precio es referencial. `;
+  const reads = option.live
+    ? ''
+    : `PayRight no lee directamente la web de ${name}: su precio es referencial. `;
   return {
     tone: 'unverified',
-    title: 'No pudimos verificarlo; te llevamos igual con el precio de referencia',
+    title:
+      'No pudimos verificarlo; te llevamos igual con el precio de referencia',
     detail: `${name}: ${money(option.price)}${seen}. ${reads}Puede haber cambiado: confírmalo en su sitio.`,
   };
 }
@@ -99,8 +108,14 @@ function openNotice(option: GoOptionDTO, now: number): GoNotice {
  * Decide qué hacer con la respuesta de `/go`. Con `chain` fijo la API solo mira esa cadena. Si hay `target`, se abre
  * la `url` de esa opción (y se dice antes qué se encontró); si no, se explica que no hay tienda a la que ir.
  */
-export function planGo(go: GoDTO, chain?: string, now: number = Date.now()): GoPlan {
-  const option = go.target ? go.options.find((o) => o.chain.slug === go.target) : undefined;
+export function planGo(
+  go: GoDTO,
+  chain?: string,
+  now: number = Date.now(),
+): GoPlan {
+  const option = go.target
+    ? go.options.find((o) => o.chain.slug === go.target)
+    : undefined;
   if (!go.target) return { kind: 'none', notice: noneNotice(go, chain) };
 
   if (!option || !option.available || !isStoreUrl(option.url)) {
@@ -122,6 +137,7 @@ export function planGo(go: GoDTO, chain?: string, now: number = Date.now()): GoP
     chainName: option.chain.name,
     price: option.price,
     notice,
-    delayMs: OPEN_DELAY_MS[notice.tone as 'verified' | 'changed' | 'unverified'],
+    delayMs:
+      OPEN_DELAY_MS[notice.tone as 'verified' | 'changed' | 'unverified'],
   };
 }

@@ -23,7 +23,9 @@ async function openMapsUrl(url: string): Promise<void> {
  * «Cómo llegar» a una sucursal. `name` es solo informativo: la ruta se pide por coordenadas (ver `directionsUrl`).
  * No lanza: si las coordenadas no sirven o no hay nada que abra el enlace, no hace nada.
  */
-export async function openDirections(to: LatLng & { name?: string }): Promise<void> {
+export async function openDirections(
+  to: LatLng & { name?: string },
+): Promise<void> {
   if (!isLatLng(to)) return;
   await openMapsUrl(directionsUrl(to));
 }

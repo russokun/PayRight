@@ -1,8 +1,4 @@
-import {
-  keepPreviousData,
-  useMutation,
-  useQuery,
-} from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
 import {
   getCommunes,
   getGo,
@@ -33,7 +29,10 @@ export const placesKeys = {
 };
 
 /** Mejores precios cerca de `loc` (de `useApiLocation()`). Sin ubicación no consulta. */
-export function useNearby(loc: LatLng | null, radiusKm: number = DEFAULT_RADIUS_KM) {
+export function useNearby(
+  loc: LatLng | null,
+  radiusKm: number = DEFAULT_RADIUS_KM,
+) {
   return useQuery({
     queryKey: placesKeys.nearby(loc, radiusKm),
     queryFn: ({ signal }) =>
@@ -53,7 +52,10 @@ export function useStores(loc: LatLng | null) {
   return useQuery({
     queryKey: placesKeys.stores(loc),
     queryFn: ({ signal }) =>
-      getStores({ lat: loc!.lat, lng: loc!.lng, limit: STORES_LIMIT }, { signal }),
+      getStores(
+        { lat: loc!.lat, lng: loc!.lng, limit: STORES_LIMIT },
+        { signal },
+      ),
     enabled: loc !== null,
     staleTime: PLACES_STALE.stores,
     placeholderData: keepPreviousData,

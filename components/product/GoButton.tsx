@@ -1,6 +1,6 @@
 import { Check, ExternalLink } from 'lucide-react-native';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, Text, View } from 'react-native';
+import { AccessibilityInfo, Platform, Text, View } from 'react-native';
 import { Button, ErrorState, Notice } from '@/components/ui';
 import { errorMessage } from '@/lib/api/errors';
 import { useGo } from '@/lib/api/places-queries';
@@ -125,17 +125,20 @@ export function GoButton({ slug, chain, label, variant = 'accent' }: Props) {
             setPhase({ kind: 'ready', plan, opening: false });
             return;
           }
-          void AccessibilityInfo.isScreenReaderEnabled()
-            .catch(() => false)
-            .then((reader) => {
-              if (ctl.signal.aborted) return;
-              if (reader) {
-                setPhase({ kind: 'ready', plan, opening: false });
-                return;
-              }
-              setPhase({ kind: 'ready', plan, opening: true });
-              timer.current = setTimeout(() => openStore(plan), plan.delayMs);
-            });
+          // en web `isScreenReaderEnabled()` siempre dice que sí (no se puede saber): allí se trata como «no»
+          const readerOn =
+            Platform.OS === 'web'
+              ? Promise.resolve(false)
+              : AccessibilityInfo.isScreenReaderEnabled().catch(() => false);
+          void readerOn.then((reader) => {
+            if (ctl.signal.aborted) return;
+            if (reader) {
+              setPhase({ kind: 'ready', plan, opening: false });
+              return;
+            }
+            setPhase({ kind: 'ready', plan, opening: true });
+            timer.current = setTimeout(() => openStore(plan), plan.delayMs);
+          });
         },
         onError: (e) => {
           if (ctl.signal.aborted) return; // la persona canceló: no es un error
@@ -152,7 +155,9 @@ export function GoButton({ slug, chain, label, variant = 'accent' }: Props) {
   }, [clearTimer]);
 
   const verifying = phase.kind === 'verifying';
-  const title = verifying ? 'Verificando el precio…' : (label ?? 'Ir a la tienda');
+  const title = verifying
+    ? 'Verificando el precio…'
+    : (label ?? 'Ir a la tienda');
   const ready = phase.kind === 'ready' ? phase : null;
   const plan = ready?.plan.kind === 'open' ? ready.plan : null;
 
@@ -168,7 +173,11 @@ export function GoButton({ slug, chain, label, variant = 'accent' }: Props) {
         }
         icon={
           verifying ? undefined : (
-            <ExternalLink size={18} strokeWidth={2.4} color={colors[ICON[variant]]} />
+            <ExternalLink
+              size={18}
+              strokeWidth={2.4}
+              color={colors[ICON[variant]]}
+            />
           )
         }
       />
@@ -213,7 +222,9 @@ export function GoButton({ slug, chain, label, variant = 'accent' }: Props) {
               title={`Abrir ${plan.chainName}`}
               variant="secondary"
               onPress={() => openStore(plan)}
-              icon={<ExternalLink size={18} strokeWidth={2.4} color={colors.ink} />}
+              icon={
+                <ExternalLink size={18} strokeWidth={2.4} color={colors.ink} />
+              }
             />
           )}
         </View>

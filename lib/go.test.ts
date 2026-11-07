@@ -21,7 +21,10 @@ function option(over: Partial<GoOptionDTO> = {}): GoOptionDTO {
   };
 }
 
-const go = (options: GoOptionDTO[], target: string | null = options[0]?.chain.slug ?? null): GoDTO => ({ target, options });
+const go = (
+  options: GoOptionDTO[],
+  target: string | null = options[0]?.chain.slug ?? null,
+): GoDTO => ({ target, options });
 
 describe('planGo: hay tienda a la que ir', () => {
   it('verificado: abre la url y dice el precio de ahora', () => {
@@ -37,27 +40,48 @@ describe('planGo: hay tienda a la que ir', () => {
   });
 
   it('cambió: dice antes y ahora, y espera más para que se lea', () => {
-    const plan = planGo(go([option({ status: 'changed', price: 1190, previous_price: 1090 })]), undefined, NOW);
+    const plan = planGo(
+      go([option({ status: 'changed', price: 1190, previous_price: 1090 })]),
+      undefined,
+      NOW,
+    );
     assert.equal(plan.kind, 'open');
     if (plan.kind !== 'open') return;
     assert.equal(plan.notice.tone, 'changed');
-    assert.equal(plan.notice.title, 'El precio cambió: antes $1.090, ahora $1.190');
+    assert.equal(
+      plan.notice.title,
+      'El precio cambió: antes $1.090, ahora $1.190',
+    );
     assert.match(plan.notice.detail ?? '', /^En Jumbo\./);
     assert.ok(plan.delayMs > OPEN_DELAY_MS.verified);
   });
 
   it('cambió sin precio anterior: solo dice el de ahora', () => {
-    const plan = planGo(go([option({ status: 'changed', price: 990, previous_price: null })]), undefined, NOW);
+    const plan = planGo(
+      go([option({ status: 'changed', price: 990, previous_price: null })]),
+      undefined,
+      NOW,
+    );
     assert.equal(plan.notice.title, 'El precio cambió: ahora $990');
   });
 
   it('failed: te lleva igual con el precio de referencia y dice desde cuándo', () => {
-    const plan = planGo(go([option({ status: 'failed', checked_at: null })]), undefined, NOW);
+    const plan = planGo(
+      go([option({ status: 'failed', checked_at: null })]),
+      undefined,
+      NOW,
+    );
     assert.equal(plan.kind, 'open');
     if (plan.kind !== 'open') return;
     assert.equal(plan.notice.tone, 'unverified');
-    assert.equal(plan.notice.title, 'No pudimos verificarlo; te llevamos igual con el precio de referencia');
-    assert.match(plan.notice.detail ?? '', /Jumbo: \$1\.090 \(visto hace 1 h\)/);
+    assert.equal(
+      plan.notice.title,
+      'No pudimos verificarlo; te llevamos igual con el precio de referencia',
+    );
+    assert.match(
+      plan.notice.detail ?? '',
+      /Jumbo: \$1\.090 \(visto hace 1 h\)/,
+    );
     assert.doesNotMatch(plan.notice.detail ?? '', /no lee directamente/);
   });
 
@@ -73,14 +97,24 @@ describe('planGo: hay tienda a la que ir', () => {
     const plan = planGo(go([lider]), undefined, NOW);
     assert.equal(plan.kind, 'open');
     if (plan.kind !== 'open') return;
-    assert.equal(plan.notice.title, 'No pudimos verificarlo; te llevamos igual con el precio de referencia');
+    assert.equal(
+      plan.notice.title,
+      'No pudimos verificarlo; te llevamos igual con el precio de referencia',
+    );
     assert.match(plan.notice.detail ?? '', /recibido hace 5 h/);
-    assert.match(plan.notice.detail ?? '', /PayRight no lee directamente la web de Líder/);
+    assert.match(
+      plan.notice.detail ?? '',
+      /PayRight no lee directamente la web de Líder/,
+    );
   });
 
   it('abre la opción que dice target, no la primera de la lista', () => {
     const jumbo = option({ price: 1290 });
-    const si = option({ chain: { slug: 'santa-isabel', name: 'Santa Isabel', color: '#e30613' }, url: 'https://www.santaisabel.cl/p', price: 1090 });
+    const si = option({
+      chain: { slug: 'santa-isabel', name: 'Santa Isabel', color: '#e30613' },
+      url: 'https://www.santaisabel.cl/p',
+      price: 1090,
+    });
     const plan = planGo(go([jumbo, si], 'santa-isabel'), undefined, NOW);
     assert.equal(plan.kind, 'open');
     if (plan.kind !== 'open') return;
@@ -91,17 +125,28 @@ describe('planGo: hay tienda a la que ir', () => {
 
 describe('planGo: no hay a dónde ir', () => {
   it('sin target ni cadena fija: «Ninguna tienda lo tiene ahora»', () => {
-    const plan = planGo(go([option({ status: 'gone', available: false })], null), undefined, NOW);
+    const plan = planGo(
+      go([option({ status: 'gone', available: false })], null),
+      undefined,
+      NOW,
+    );
     assert.deepEqual(plan.kind, 'none');
     assert.equal(plan.notice.title, 'Ninguna tienda lo tiene ahora');
   });
 
   it('sin opciones: también', () => {
-    assert.equal(planGo({ target: null, options: [] }).notice.title, 'Ninguna tienda lo tiene ahora');
+    assert.equal(
+      planGo({ target: null, options: [] }).notice.title,
+      'Ninguna tienda lo tiene ahora',
+    );
   });
 
   it('cadena fija que ya no lo tiene (gone): «Esa tienda ya no tiene el producto»', () => {
-    const plan = planGo(go([option({ status: 'gone', available: false })], null), 'jumbo', NOW);
+    const plan = planGo(
+      go([option({ status: 'gone', available: false })], null),
+      'jumbo',
+      NOW,
+    );
     assert.equal(plan.kind, 'none');
     assert.equal(plan.notice.title, 'Esa tienda ya no tiene el producto');
   });
@@ -120,7 +165,10 @@ describe('planGo: no hay a dónde ir', () => {
     ]) {
       const plan = planGo(g, undefined, NOW);
       assert.equal(plan.kind, 'none');
-      assert.equal(plan.notice.title, 'No tenemos una página de la tienda a la que llevarte');
+      assert.equal(
+        plan.notice.title,
+        'No tenemos una página de la tienda a la que llevarte',
+      );
     }
   });
 });

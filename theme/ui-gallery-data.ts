@@ -10,7 +10,6 @@ export const DEMO_PHOTO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAAB
 
 const HOUR = 3_600_000;
 export const ago = (ms: number) => new Date(Date.now() - ms).toISOString();
-export const inFuture = (ms: number) => new Date(Date.now() + ms).toISOString();
 export { HOUR };
 
 /** 23:59:59 hora de Santiago, `days` días desde hoy (como las ofertas reales): "vence hoy" = 0, "mañana" = 1. */

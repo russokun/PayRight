@@ -46,7 +46,8 @@ export function PriceBlock({ price, listPrice, ppum, ppumUnit, promoEndsAt, size
 
   return (
     <View accessible accessibilityLabel={spoken} className={right ? "items-end" : "items-start"}>
-      <Text className="font-display-extrabold text-ink" style={[tabularNums, SCALE[size]]}>
+      {/* con el texto del sistema al máximo, una cifra de 48 px no cabría en la pantalla: se limita solo a esta cifra */}
+      <Text className="font-display-extrabold text-ink" maxFontSizeMultiplier={1.4} style={[tabularNums, SCALE[size]]}>
         {money(price)}
       </Text>
       {list !== null && (

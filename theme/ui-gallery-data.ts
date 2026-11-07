@@ -46,6 +46,8 @@ const cheapest = (over: Partial<CheapestDTO> = {}): CheapestDTO => ({
   ppum: null,
   ppum_unit: null,
   source: "community",
+  seen_at: new Date(Date.now() - 2 * 3_600_000).toISOString(),
+  seen_at_exact: true,
   verified: false,
   ...over,
 });

@@ -6,12 +6,11 @@ import type { ProductDTO } from "@/types/api";
 import { ChainPill } from "./ChainPill";
 import { LabelTile } from "./LabelTile";
 import { PriceBlock } from "./PriceBlock";
-import { SourceTag, sourceLabel } from "./SourceBadge";
+import { SourceBadge, sourceLabel } from "./SourceBadge";
 
 /**
  * Fila de resultados: foto o etiqueta, nombre, marca · formato, el precio más bajo (con su origen) y en qué
- * cadena. La lista de búsqueda de la API no trae la fecha de cada precio: el origen va aquí y la fecha en la
- * ficha (PriceRow → SourceBadge).
+ * cadena, con su origen y su fecha (`cheapest.seen_at`: «visto hace…», o «recibido hace…» si llega por fuente asociada).
  */
 export function ProductCard({ product, onPress }: { product: ProductDTO; onPress: () => void }) {
   const { colors } = useTheme();
@@ -61,7 +60,7 @@ export function ProductCard({ product, onPress }: { product: ProductDTO; onPress
             )}
             {best && (
               <View className="flex-row flex-wrap items-center gap-x-2 gap-y-1">
-                <SourceTag source={best.source} />
+                <SourceBadge source={best.source} seenAt={best.seen_at} exact={best.seen_at_exact} />
                 {chains > 1 && <Text className="font-sans-medium text-xs text-muted">{`${chains} cadenas`}</Text>}
                 {best.verified && (
                   <View className="flex-row items-center gap-0.5">

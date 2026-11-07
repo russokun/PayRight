@@ -30,6 +30,10 @@ export type CheapestDTO = {
   ppum: number | null;
   ppum_unit: string | null;
   source: PriceSourceDTO;
+  /** When this price was last seen; for `partner` it is when PayRight received it (see `PriceDTO.seen_at_exact`). */
+  seen_at: string;
+  /** False for `partner` prices: say "recibido hace…", not "visto hace…". */
+  seen_at_exact: boolean;
   /** At least one person confirmed it. */
   verified: boolean;
 };
@@ -106,7 +110,10 @@ export type ProductDetailDTO = {
    * variants (another size, flavour or pack): show "puede no ser idéntico" next to the prices.
    */
   comparison: { barcode: BarcodeStateDTO; gtin: string | null; may_differ: boolean };
-  /** When the chains' web prices were last confirmed against the chain's own page; null when never. */
+  /**
+   * When PayRight last confirmed, against the chain's own page, the web prices it reads directly (the oldest
+   * of those pages). Chains whose prices arrive from a partner source do not count. Null when never.
+   */
   checked_at: string | null;
   /** The location the distances were measured from, named; null when none was sent. */
   location: { lat: number; lng: number; place: string } | null;

@@ -4,7 +4,7 @@ La fuente de verdad del contrato vive en **payright-web**: `docs/api-v1.md` (exp
 `types/api.ts` de esta app es una **copia** de ese `dto.ts`: no se edita a mano, se vuelve a copiar.
 
 ## Endpoints (solo lectura, sin cuenta)
-Base: `EXPO_PUBLIC_API_URL` (por defecto `http://localhost:3111/api/v1`). Respuesta `{ data, meta? }`; error `{ error: { code, message, details? } }`
+Base: `EXPO_PUBLIC_API_URL` (por defecto `http://localhost:3000/api/v1`). Respuesta `{ data, meta? }`; error `{ error: { code, message, details? } }`
 con `invalid_request` (400), `not_found` (404), `rate_limited` (429 + `Retry-After`), `internal_error` (500).
 
 | Ruta | Devuelve |

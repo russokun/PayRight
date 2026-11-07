@@ -11,6 +11,17 @@ Trabajar **un bloque a la vez**, cada uno entregable y verificado.
 - `npm run typecheck` · `npm test` · `CI=1 EXPO_OFFLINE=1 npx expo export --platform ios|android|web` · galería de componentes: `EXPO_PUBLIC_UI_GALLERY=1` y la ruta `/ui-gallery`.
 - `types/api.ts` es una **copia** de `payright-web/lib/api/v1/dto.ts`: no se edita a mano.
 
+## Probar en el teléfono con Expo Go
+Todo lo que usa la app viene incluido en Expo Go SDK 58 (verificado contra `expo/bundledNativeModules.json`; el resto es JavaScript puro).
+1. **API** (en `payright-web`): `npm run dev` (puerto 3000, datos de demostración) o `npm run setup:real` antes para precios reales de Jumbo y Santa Isabel.
+2. **IP de tu computador** en la red (Windows: `ipconfig`; macOS/Linux: `ipconfig getifaddr en0` / `hostname -I`). Teléfono y computador en el mismo Wi‑Fi.
+3. **App**: copiar `.env.example` a `.env` y poner `EXPO_PUBLIC_API_URL=http://<tu IP>:3000/api/v1` (se lee al arrancar Metro: reiniciarlo si lo cambias).
+4. `npm ci && npx expo start` y escanear el QR con Expo Go (actualizada a SDK 58).
+5. Si el cortafuegos pregunta, permitir los puertos 3000 (API) y 8081 (Metro). Si la red bloquea el tráfico entre dispositivos: `npx expo start --tunnel` para Metro; la API necesitará otro túnel o estar publicada.
+
+Límites de Expo Go: el esquema `payright://` y los enlaces universales no funcionan (Go usa `exp://`); las notificaciones push (bloque 8) y cualquier módulo nativo propio piden un development build (`expo-dev-client`).
+**No verificado**: que HTTP sin cifrar hacia tu IP local funcione en tu teléfono (Expo Go suele permitirlo); en builds de tienda hace falta HTTPS.
+
 ## Reglas
 - **Nunca datos inventados presentados como reales** (PRODUCT.md de la web). Todo precio lleva
   `source` y `seen_at`; lo que no tenga datos reales dice "Próximamente" o "Demostración".

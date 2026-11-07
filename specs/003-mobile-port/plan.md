@@ -1,6 +1,6 @@
 # 003 — Portar payright-web a la app móvil nativa
 
-Estado: bloques 0, 1 (API), 2 (tokens y componentes) y 3 (buscar, ficha, escáner, categorías) **terminados**. Siguiente: bloque 4 (carrito y cotizar) y 5 (Cerca).
+Estado: bloques 0 a 5 **terminados** (API, tokens y componentes, buscar/ficha/escáner, carrito y cotizar, Cerca y «Ir a la tienda»). Siguiente: bloque 6 (cuenta, subir precio con foto, votos, guardados, ranking).
 Plan elaborado con revisión de arquitectura (Opus) y verificado contra el código de ambos repos.
 Reemplaza a `specs/002-*`, cuyo contrato (Supabase + scraper Python) no coincide con la web real
 (archivado en `specs/_archivo/`).
@@ -42,8 +42,8 @@ Reemplaza a `specs/002-*`, cuyo contrato (Supabase + scraper Python) no coincide
 | 1 ✅ | `/api/v1` lectura en payright-web (`search`, `products/:slug`, `barcode/:ean`, `meta`); contrato en [`api-v1.md`](api-v1.md) | `curl` devuelve datos reales; test unitario del mapeo; `image_url` null con contenido de cadena apagado | — (leer `node_modules/next/dist/docs`, ver AGENTS.md de la web) |
 | 2 ✅ | Tokens y componentes base (claro/oscuro, fuentes, PriceBlock, SourceBadge, ProductCard, Button, LabelTile) | cero colores hardcodeados; sigue el tema del sistema | expo-web-to-native (leer una vez), expo-design-system, expo-native-ui |
 | 3 ✅ | Buscar, ficha, escáner y categorías con datos reales | buscar "leche" → ficha con cadenas, origen y fecha; escanear EAN abre la ficha | expo-data-fetching, expo-router, expo-ui |
-| 4 | Carrito y cotizar (local primero) | misma cotización que la web para la misma lista | expo-data-fetching |
-| 5 | Cerca y "Ir al más barato" | sucursal más cercana por cadena con GPS/comuna | expo-native-ui |
+| 4 ✅ | Carrito y cotizar (local primero) | misma cotización que la web para la misma lista | expo-data-fetching |
+| 5 ✅ | Cerca y "Ir al más barato" | sucursal más cercana por cadena con GPS/comuna | expo-native-ui |
 | 6 | Auth Bearer, subir precio con foto, votos, guardados, ranking | foto subida visible en la web | expo-data-fetching |
 | 7 | Pulido y movimiento (press 0.97, stagger 45 ms, QuoteReveal, reduce motion, 44 px) | auditoría de deriva limpia | expo-animation, genjutsu `cast`, expo-design-system (audit) |
 | 8 | Offline, deep links, push | sin red muestra la última ficha con su fecha; `payright.cl/lista?p=` abre la app | expo-data-fetching, expo-router |
@@ -70,3 +70,11 @@ Pendiente de probar en teléfono: cámara y permisos del escáner, linterna, há
 rendimiento de listas, y que `Intl` con zona `America/Santiago` funcione en Hermes. La ficha por cadena (`listings`), `comparison` y `checked_at`
 se probaron con fixtures y tests unitarios, no con un scrape real (la demo no trae fichas de cadena).
 Hallazgo para la web: `alert` sobre `alert-bg` en modo claro da 4,40:1 (bajo AA 4,5:1).
+
+## Bloques 4 y 5: decisiones y lo que NO está verificado
+- **Carrito en el dispositivo** (zustand + `expo-sqlite/localStorage`); el servidor solo lo cotiza (`POST /cart/quote`, sin estado). La sincronización entre dispositivos llega con la cuenta (bloque 6).
+- **Ubicación solo en el dispositivo**, redondeada a ~110 m; viaja como `lat`/`lng` en las consultas.
+- **«Ir a la tienda»** (`GET /products/:slug/go`) relee en vivo las cadenas que PayRight puede leer y recién entonces abre su página; reemplaza abrir el enlace directo.
+- La demo no trae páginas de cadena (`can_go=false`, `go` sin destino): `verified`, `changed`, `gone` y `failed` se vieron solo con fixtures y tests puros, no con respuestas reales.
+- Sin verificar en dispositivo: GPS y permisos reales, abrir mapas y tiendas con `Linking`/`WebBrowser`, `Share` nativo, háptica, `expo-sqlite` (en web se usó `localStorage`), VoiceOver/TalkBack, rendimiento de la lista de comunas.
+- Pendiente cosmético: `km()` no pone separador de miles («1690 km»); sin pantalla para renombrar listas guardadas.

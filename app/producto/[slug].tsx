@@ -1,6 +1,9 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback } from 'react';
 import { FlatList, Text, View } from 'react-native';
+import { AddToCartButton } from '@/components/cart/AddToCartButton';
+import { LocationHint } from '@/components/cart/LocationHint';
+import { GoButton } from '@/components/product/GoButton';
 import { ListingDetails } from '@/components/product/ListingDetails';
 import { TrendSection } from '@/components/product/TrendSection';
 import { Verdict } from '@/components/product/Verdict';
@@ -17,7 +20,6 @@ import { errorMessage, isNotFound } from '@/lib/api/errors';
 import { useMeta, useProduct } from '@/lib/api/queries';
 import { useApiLocation } from '@/store/useLocationStore';
 import { timeAgo } from '@/lib/format';
-import { openExternal } from '@/lib/open-external';
 import { comparisonNotices, hasWebPrices } from '@/lib/product-view';
 import { useTheme } from '@/theme/useTheme';
 import type { PriceDTO } from '@/types/api';
@@ -33,19 +35,22 @@ export default function ProductScreen() {
   const product = useProduct(slug ?? '', location);
   const meta = useMeta();
 
+  // un precio web se abre con «Ir a la tienda»: relee la tienda en vivo (donde PayRight puede) antes de llevarte a su página
   const renderPrice = useCallback(
     ({ item, index }: { item: PriceDTO; index: number }) => (
-      <PriceRow
-        entry={item}
-        cheapest={index === 0}
-        onPress={
-          item.source_url
-            ? () => void openExternal(item.source_url!)
-            : undefined
-        }
-      />
+      <View className="gap-2">
+        <PriceRow entry={item} cheapest={index === 0} />
+        {item.source_url ? (
+          <GoButton
+            slug={slug ?? ''}
+            chain={item.chain.slug}
+            label={`Ir a ${item.chain.name}`}
+            variant="secondary"
+          />
+        ) : null}
+      </View>
     ),
-    [],
+    [slug],
   );
 
   const screenOptions = (title: string) => (
@@ -170,6 +175,11 @@ export default function ProductScreen() {
       {prices.length > 0 ? (
         <>
           <Verdict prices={prices} mayDiffer={notices.mayDiffer} />
+          <View className="gap-3">
+            <GoButton slug={p.slug} />
+            <AddToCartButton product={p} />
+            <LocationHint />
+          </View>
           <View className="gap-1 pt-2">
             <Text
               accessibilityRole="header"

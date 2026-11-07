@@ -23,7 +23,7 @@ export default function CarritoScreen() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const meta = useMeta();
-  const { query, lines } = useCartQuote();
+  const { query, lines, stale } = useCartQuote();
   const pruned = useCartStore((s) => s.pruned);
   const dismissPruned = useCartStore((s) => s.dismissPruned);
   const setQty = useCartStore((s) => s.setQty);
@@ -33,7 +33,6 @@ export default function CarritoScreen() {
   const [confirmClear, setConfirmClear] = useState(false);
 
   const quote = query.data;
-  const stale = query.isPlaceholderData;
   const share = stale ? null : shareMessage(quote);
   const units = unitsCount(lines);
   const products = distinctCount(lines);

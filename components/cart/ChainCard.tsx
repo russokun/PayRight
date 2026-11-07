@@ -3,7 +3,7 @@ import { memo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { GoButton } from '@/components/product/GoButton';
 import { Button, ChainPill, SourceTag, Tag, sourceLabel } from '@/components/ui';
-import { chainNote, coverageLabel, missingLabel, missingNames, productsCount } from '@/lib/cart/quote-view';
+import { chainNote, coverageLabel, missingLabel, missingNames, productsCount, standing, standingLabel } from '@/lib/cart/quote-view';
 import { km, money } from '@/lib/format';
 import { openDirections } from '@/lib/maps';
 import { openExternal } from '@/lib/open-external';
@@ -51,15 +51,17 @@ function Where({ chain }: { chain: QuoteChainDTO }) {
 export const ChainCard = memo(function ChainCard({ quote, chain, index, expanded, onToggle }: Props) {
   const { colors } = useTheme();
   const total = productsCount(quote);
-  const winner = index === 0 && quote.comparable && chain.complete;
+  const place = standing(quote, chain, index);
+  const winner = place !== null;
+  const placeLabel = standingLabel(place);
   const note = chainNote(quote, chain, index);
   const coverage = coverageLabel(chain, total);
   const missing = missingLabel(missingNames(chain, quote.items));
   const Chevron = expanded ? ChevronUp : ChevronDown;
 
   const spoken = [
-    `${index + 1}. ${chain.name}`,
-    winner ? 'el más barato' : null,
+    chain.complete ? `${index + 1}. ${chain.name}` : chain.name,
+    placeLabel ? placeLabel.toLowerCase() : null,
     coverage,
     chain.distance_km != null ? `a ${km(chain.distance_km)}` : null,
     `total ${money(chain.total)}`,
@@ -79,13 +81,14 @@ export const ChainCard = memo(function ChainCard({ quote, chain, index, expanded
         onPress={() => onToggle(chain.slug)}
         className="flex-row items-start gap-3 p-4 active:opacity-80"
       >
+        {/* sin número para una cadena incompleta: su total parcial no entra en el ranking */}
         <Text className="w-5 pt-0.5 text-center font-sans-bold text-sm text-muted" style={tabularNums}>
-          {index + 1}
+          {chain.complete ? index + 1 : ''}
         </Text>
         <View className="min-w-0 flex-1 gap-1.5">
           <View className="flex-row flex-wrap items-center gap-2">
             <ChainPill name={chain.name} color={chain.color} />
-            {winner && <Tag>Más barato</Tag>}
+            {placeLabel && <Tag>{placeLabel}</Tag>}
           </View>
           <Text className="font-sans-medium text-sm text-muted">
             {coverage}
@@ -110,12 +113,13 @@ export const ChainCard = memo(function ChainCard({ quote, chain, index, expanded
         <View className="gap-4 border-t border-ink/10 p-4">
           <Where chain={chain} />
           <View className="gap-3">
-            {quote.items.map((item) => {
+            {quote.items.map((item, i) => {
+              const divider = i > 0 ? 'border-t border-ink/10 pt-3' : '';
               const cell = chain.cells[item.slug];
               const label = `${item.name}${item.qty > 1 ? ` ×${item.qty}` : ''}`;
               if (!cell) {
                 return (
-                  <View key={item.slug} accessible accessibilityLabel={`${label}: ${chain.name} no tiene precio`} className="flex-row items-center justify-between gap-3">
+                  <View key={item.slug} accessible accessibilityLabel={`${label}: ${chain.name} no tiene precio`} className={`flex-row items-center justify-between gap-3 ${divider}`}>
                     <Text numberOfLines={2} className="min-w-0 flex-1 font-sans text-sm text-muted">
                       {label}
                     </Text>
@@ -124,7 +128,7 @@ export const ChainCard = memo(function ChainCard({ quote, chain, index, expanded
                 );
               }
               return (
-                <View key={item.slug} className="gap-1.5">
+                <View key={item.slug} className={`gap-1.5 ${divider}`}>
                   <View className="flex-row items-start justify-between gap-3">
                     <View className="min-w-0 flex-1">
                       <Text numberOfLines={2} className="font-sans-semibold text-sm text-ink">
@@ -175,7 +179,7 @@ export const ChainCard = memo(function ChainCard({ quote, chain, index, expanded
           )}
           {chain.site && (
             <View className="items-start">
-              <Button title={`Abrir el sitio de ${chain.name}`} variant="ghost" onPress={() => void openExternal(chain.site!)} />
+              <Button title={`Abrir el sitio de ${chain.name}`} variant="secondary" onPress={() => void openExternal(chain.site!)} />
             </View>
           )}
         </View>

@@ -24,6 +24,32 @@ export function hasCompleteChain(quote: QuoteDTO): boolean {
   return quote.chains.some((c) => c.complete);
 }
 
+/** Cuántas cadenas tienen toda la lista. */
+export function completeCount(quote: QuoteDTO): number {
+  return quote.chains.filter((c) => c.complete).length;
+}
+
+/**
+ * Qué lugar ocupa una cadena en la comparación:
+ * - `cheapest`: la primera, comparable, y hay otra cadena con toda la lista contra la que ganar.
+ * - `only`: la primera y la ÚNICA con toda la lista. Los totales parciales de las demás son menores solo porque les
+ *   faltan productos: no se dice «más barato».
+ * - `null`: cualquier otra.
+ */
+export type Standing = 'cheapest' | 'only' | null;
+
+export function standing(quote: QuoteDTO, chain: Pick<QuoteChainDTO, 'complete'>, index: number): Standing {
+  if (index !== 0 || !quote.comparable || !chain.complete) return null;
+  return completeCount(quote) > 1 ? 'cheapest' : 'only';
+}
+
+/** Etiqueta del lugar: «Más barato» o «Única con todo». */
+export function standingLabel(s: Standing): string | null {
+  if (s === 'cheapest') return 'Más barato';
+  if (s === 'only') return 'Única con todo';
+  return null;
+}
+
 /** «Tiene todo» o «Tiene 2 de 3». */
 export function coverageLabel(chain: Pick<QuoteChainDTO, 'complete' | 'has'>, products: number): string {
   if (chain.complete) return 'Tiene todo';
@@ -64,14 +90,14 @@ export function headline(quote: QuoteDTO): Headline | null {
     };
   }
 
-  const only = quote.chains.length === 1;
+  const only = completeCount(quote) === 1;
   const worst = quote.vs_worst && quote.vs_worst.amount > 0 ? quote.vs_worst : null;
   const second = quote.vs_second && quote.vs_second.amount > 0 ? quote.vs_second : null;
   return {
-    kicker: only ? 'Solo lo tiene' : 'El más barato es',
-    saving: worst ? `Ahorras ${money(worst.amount)} frente a ${worst.chain}` : null,
-    second: second && second.chain !== worst?.chain ? `${money(second.amount)} menos que ${second.chain}, la segunda` : null,
-    caveat: null,
+    kicker: only ? 'La única con toda tu lista' : 'El más barato es',
+    saving: !only && worst ? `Ahorras ${money(worst.amount)} frente a ${worst.chain}` : null,
+    second: !only && second && second.chain !== worst?.chain ? `${money(second.amount)} menos que ${second.chain}, la segunda` : null,
+    caveat: only && quote.chains.length > 1 ? 'Las demás cadenas no tienen todos tus productos: sus totales son parciales y no se comparan con este.' : null,
   };
 }
 
@@ -82,16 +108,20 @@ export function headline(quote: QuoteDTO): Headline | null {
 export function summaryLine(quote: QuoteDTO): string {
   const w = winnerOf(quote);
   if (!w) return 'Todavía no hay precios para tu lista';
-  if (quote.comparable && w.complete) return `Más barato: ${w.chain.name} · ${money(w.chain.total)}`;
+  const st = standing(quote, w.chain, 0);
+  if (st === 'cheapest') return `Más barato: ${w.chain.name} · ${money(w.chain.total)}`;
+  if (st === 'only') return `Solo ${w.chain.name} tiene todo · ${money(w.chain.total)}`;
   return `Nadie tiene todo · ${w.chain.name} tiene ${w.chain.has} de ${productsCount(quote)}`;
 }
 
-/** Texto corto bajo el total de cada cadena: «el más barato», «+$1.200» o «total parcial». */
+/** Texto corto bajo el total de cada cadena: «El más barato», «+$1.200», «Total completo» o «Total parcial». */
 export function chainNote(quote: QuoteDTO, chain: QuoteChainDTO, index: number): string {
-  if (index === 0 && quote.comparable && chain.complete) return 'El más barato';
+  const st = standing(quote, chain, index);
+  if (st === 'cheapest') return 'El más barato';
+  if (st === 'only') return 'Total completo';
   if (chain.diff !== null && chain.diff > 0) return `+${money(chain.diff)}`;
   if (chain.diff !== null) return 'Mismo total';
-  return 'Total parcial';
+  return chain.complete ? 'Total completo' : 'Total parcial';
 }
 
 /** Nombres de los productos que a esta cadena le faltan (los que ya no están en la cotización se omiten). */
@@ -100,10 +130,12 @@ export function missingNames(chain: Pick<QuoteChainDTO, 'missing'>, items: reado
   return chain.missing.map((s) => byslug.get(s)).filter((n): n is string => !!n);
 }
 
-/** «Falta Leche entera» / «Faltan Leche entera, Pan». */
+/** «Le falta 1 producto: Leche entera» / «Le faltan 2 productos: Leche entera, Pan». */
 export function missingLabel(names: readonly string[]): string | null {
   if (names.length === 0) return null;
-  return `${names.length === 1 ? 'Falta' : 'Faltan'} ${names.join(', ')}`;
+  return names.length === 1
+    ? `Le falta 1 producto: ${names[0]}`
+    : `Le faltan ${names.length} productos: ${names.join(', ')}`;
 }
 
 /** «Jumbo y Líder no tienen precio para ningún producto de tu lista.» */

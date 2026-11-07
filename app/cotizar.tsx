@@ -55,6 +55,9 @@ function Banner({ quote }: { quote: QuoteDTO }) {
       ) : (
         h.caveat && <Text className="font-sans text-base leading-6 text-field-ink">{h.caveat}</Text>
       )}
+      {winner && h.caveat ? (
+        <Text className="font-sans text-sm leading-5 text-field-ink opacity-90">{h.caveat}</Text>
+      ) : null}
 
       {store ? (
         <View className="gap-2">
@@ -121,9 +124,8 @@ export default function QuoteScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const meta = useMeta();
-  const { query, lines } = useCartQuote();
+  const { query, lines, stale } = useCartQuote();
   const quote = query.data;
-  const stale = query.isPlaceholderData;
   const [expanded, setExpanded] = useState<string | null>(null);
 
   const toggle = useCallback((slug: string) => setExpanded((cur) => (cur === slug ? null : slug)), []);

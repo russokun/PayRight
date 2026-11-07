@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native';
 import { Button, ChainPill, ErrorState, LoadingList, Notice, Tag } from '@/components/ui';
 import { errorMessage } from '@/lib/api/errors';
-import { absentLabel, chainNote, coverageLabel, productsCount } from '@/lib/cart/quote-view';
+import { absentLabel, chainNote, coverageLabel, productsCount, standing, standingLabel } from '@/lib/cart/quote-view';
 import { km, money } from '@/lib/format';
 import { tabularNums } from '@/theme/typography';
 import type { QuoteChainDTO, QuoteDTO } from '@/types/api';
@@ -16,24 +16,27 @@ type Props = {
 };
 
 function ChainRow({ quote, chain, index }: { quote: QuoteDTO; chain: QuoteChainDTO; index: number }) {
-  const winner = index === 0 && quote.comparable && chain.complete;
+  const place = standing(quote, chain, index);
+  const winner = place !== null;
+  const placeLabel = standingLabel(place);
   const note = chainNote(quote, chain, index);
   const coverage = coverageLabel(chain, productsCount(quote));
   const where = chain.distance_km != null ? ` · a ${km(chain.distance_km)}` : '';
-  const spoken = `${index + 1}. ${chain.name}. ${coverage}${where}. Total ${money(chain.total)}. ${note}`;
+  const spoken = `${chain.complete ? `${index + 1}. ` : ''}${chain.name}. ${coverage}${where}. Total ${money(chain.total)}. ${note}`;
   return (
     <View
       accessible
       accessibilityLabel={spoken}
       className={`flex-row items-center gap-3 rounded-2xl border p-3 ${winner ? 'border-primary bg-save-bg' : 'border-line bg-surface'}`}
     >
+      {/* sin número para una cadena incompleta: su total parcial no entra en el ranking */}
       <Text className="w-5 text-center font-sans-bold text-sm text-muted" style={tabularNums}>
-        {index + 1}
+        {chain.complete ? index + 1 : ''}
       </Text>
       <View className="min-w-0 flex-1 gap-1">
         <View className="flex-row flex-wrap items-center gap-2">
           <ChainPill name={chain.name} color={chain.color} />
-          {winner && <Tag>Más barato</Tag>}
+          {placeLabel && <Tag>{placeLabel}</Tag>}
         </View>
         <Text className="font-sans-medium text-xs text-muted">
           {coverage}

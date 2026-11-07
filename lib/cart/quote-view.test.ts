@@ -3,6 +3,7 @@ import { describe, it } from 'node:test';
 import {
   absentLabel,
   chainNote,
+  completeCount,
   coverageLabel,
   hasCompleteChain,
   headline,
@@ -11,6 +12,8 @@ import {
   missingNames,
   mixSummary,
   shareMessage,
+  standing,
+  standingLabel,
   stopsLabel,
   summaryLine,
   winnerOf,
@@ -69,10 +72,20 @@ describe('headline', () => {
     assert.match(h.caveat ?? '', /Unimarc es la que más tiene: 2 de 3/);
   });
 
-  it('una sola cadena con todo: «Solo lo tiene», sin ahorro', () => {
+  it('una sola cadena en total: «La única con toda tu lista», sin ahorro ni aviso', () => {
     const h = headline(QUOTE_ONLY_ONE)!;
-    assert.equal(h.kicker, 'Solo lo tiene');
+    assert.equal(h.kicker, 'La única con toda tu lista');
     assert.equal(h.saving, null);
+    assert.equal(h.caveat, null);
+  });
+
+  it('una cadena con todo y otras parciales: no es «la más barata» y avisa que las demás no se comparan', () => {
+    const q = { ...QUOTE_COMPARABLE, chains: [JUMBO, UNIMARC], vs_worst: null, vs_second: null };
+    const h = headline(q)!;
+    assert.equal(h.kicker, 'La única con toda tu lista');
+    assert.equal(h.saving, null);
+    assert.equal(h.second, null);
+    assert.match(h.caveat ?? '', /parciales/);
   });
 
   it('un ahorro de $0 no se anuncia', () => {
@@ -85,6 +98,24 @@ describe('headline', () => {
   });
 });
 
+describe('standing', () => {
+  it('con dos cadenas completas la primera es la más barata', () => {
+    assert.equal(completeCount(QUOTE_COMPARABLE), 2);
+    assert.equal(standing(QUOTE_COMPARABLE, JUMBO, 0), 'cheapest');
+    assert.equal(standingLabel('cheapest'), 'Más barato');
+    assert.equal(standing(QUOTE_COMPARABLE, LIDER, 1), null);
+  });
+  it('con una sola completa no es «más barata» sino «única con todo»', () => {
+    const q = { ...QUOTE_COMPARABLE, chains: [JUMBO, UNIMARC] };
+    assert.equal(standing(q, JUMBO, 0), 'only');
+    assert.equal(standingLabel('only'), 'Única con todo');
+  });
+  it('sin comparación, nadie tiene lugar', () => {
+    assert.equal(standing(QUOTE_PARTIAL, QUOTE_PARTIAL.chains[0], 0), null);
+    assert.equal(standingLabel(null), null);
+  });
+});
+
 describe('chainNote', () => {
   it('la primera comparable es «El más barato»; las demás, su diferencia', () => {
     assert.equal(chainNote(QUOTE_COMPARABLE, JUMBO, 0), 'El más barato');
@@ -94,6 +125,10 @@ describe('chainNote', () => {
   it('sin comparación, nadie es «el más barato»', () => {
     assert.equal(chainNote(QUOTE_PARTIAL, QUOTE_PARTIAL.chains[0], 0), 'Total parcial');
   });
+  it('la única completa dice «Total completo», no «el más barato»', () => {
+    const q = { ...QUOTE_COMPARABLE, chains: [JUMBO, UNIMARC] };
+    assert.equal(chainNote(q, JUMBO, 0), 'Total completo');
+  });
 });
 
 describe('productos que faltan y cadenas ausentes', () => {
@@ -102,8 +137,8 @@ describe('productos que faltan y cadenas ausentes', () => {
     assert.deepEqual(missingNames({ missing: ['nada'] }, ITEMS), []);
   });
   it('missingLabel singular y plural', () => {
-    assert.equal(missingLabel(['Pan']), 'Falta Pan');
-    assert.equal(missingLabel(['Pan', 'Leche']), 'Faltan Pan, Leche');
+    assert.equal(missingLabel(['Pan']), 'Le falta 1 producto: Pan');
+    assert.equal(missingLabel(['Pan', 'Leche']), 'Le faltan 2 productos: Pan, Leche');
     assert.equal(missingLabel([]), null);
   });
   it('absentLabel', () => {
@@ -168,6 +203,10 @@ describe('summaryLine', () => {
   });
   it('si nadie tiene todo no dice «más barato»', () => {
     assert.equal(summaryLine(QUOTE_PARTIAL), 'Nadie tiene todo · Unimarc tiene 2 de 3');
+  });
+  it('si solo una cadena tiene todo, no dice «más barato»', () => {
+    const q = { ...QUOTE_COMPARABLE, chains: [JUMBO, UNIMARC] };
+    assert.equal(summaryLine(q), 'Solo Jumbo tiene todo · $4.300');
   });
   it('sin cadenas, que no hay precios', () => {
     assert.equal(summaryLine({ ...QUOTE_COMPARABLE, chains: [] }), 'Todavía no hay precios para tu lista');

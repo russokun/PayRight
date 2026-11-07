@@ -37,6 +37,15 @@ export function toRouteParams(filters: SearchFilters): Record<string, string> {
   return out;
 }
 
+/**
+ * Para `router.setParams`: los seis parámetros siempre presentes, con `undefined` donde no hay valor
+ * (`setParams` mezcla con lo anterior, así que un valor ausente tiene que quitarse explícitamente).
+ */
+export function toRouteParamsPatch(filters: SearchFilters): Record<"q" | "category" | "subcategory" | "chain" | "offers" | "sort", string | undefined> {
+  const p = toRouteParams(filters);
+  return { q: p.q, category: p.category, subcategory: p.subcategory, chain: p.chain, offers: p.offers, sort: p.sort };
+}
+
 /** Filtros que acotan la búsqueda (el texto y el orden no cuentan). */
 export function activeFilterCount(filters: SearchFilters): number {
   return [filters.category, filters.subcategory, filters.chain, filters.offers ? "1" : undefined].filter(Boolean).length;

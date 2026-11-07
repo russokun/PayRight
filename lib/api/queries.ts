@@ -103,10 +103,11 @@ export function useTrend(slug: string) {
   });
 }
 
-export function useCategories(aisles = false) {
+export function useCategories(aisles = false, enabled = true) {
   return useQuery({
     queryKey: queryKeys.categories(aisles),
     queryFn: ({ signal }) => getCategories(aisles, { signal }),
     staleTime: STALE.categories,
+    enabled,
   });
 }

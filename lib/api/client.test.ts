@@ -289,3 +289,15 @@ describe("normalizeFilters", () => {
     });
   });
 });
+
+describe("errorMessage", () => {
+  it("usa el mensaje de la API y añade la espera de un 429", async () => {
+    const { errorMessage } = await import("./errors");
+    assert.equal(errorMessage(new ApiClientError("not_found", "No existe.", 404)), "No existe.");
+    assert.equal(
+      errorMessage(new ApiClientError("rate_limited", "Muchas consultas.", 429, { retryAfterSeconds: 8 })),
+      "Muchas consultas. Espera 8 s.",
+    );
+    assert.equal(errorMessage(new Error("boom")), "Algo salió mal. Intenta de nuevo.");
+  });
+});

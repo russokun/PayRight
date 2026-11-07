@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { activeFilterCount, isUnfiltered, parseSearchParams, toRouteParams } from "./search-url";
+import { activeFilterCount, isUnfiltered, parseSearchParams, toRouteParams, toRouteParamsPatch } from "./search-url";
 
 describe("parseSearchParams", () => {
   it("lee los seis parámetros", () => {
@@ -40,6 +40,13 @@ describe("toRouteParams / conteo", () => {
 
   it("no emite lo vacío", () => {
     assert.deepEqual(toRouteParams({ q: "  ", chain: "", offers: false, sort: "relevancia" }), {});
+  });
+
+  it("el parche lleva los seis parámetros, con undefined para quitar los ausentes", () => {
+    assert.deepEqual(toRouteParamsPatch({ q: "leche", offers: true }), {
+      q: "leche", category: undefined, subcategory: undefined, chain: undefined, offers: "1", sort: undefined,
+    });
+    assert.deepEqual(Object.keys(toRouteParamsPatch({})).sort(), ["category", "chain", "offers", "q", "sort", "subcategory"]);
   });
 
   it("cuenta solo los filtros, no el texto ni el orden", () => {
